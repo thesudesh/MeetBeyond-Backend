@@ -1,0 +1,182 @@
+/* Reset and base styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #7b7ce9 0%, #9e71e6 100%);
+    min-height: 100vh;
+}
+
+/* Main Hero (Landing) */
+.main-hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+.main-box {
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 10px 40px rgba(123,124,233,0.10);
+    padding: 56px 40px 40px 40px;
+    max-width: 700px;
+    width: 94%;
+    text-align: center;
+}
+.hero-title {
+    font-size: 2.4rem;
+    color: #7b7ce9;
+    margin-bottom: 12px;
+    font-weight: 800;
+}
+.brand {
+    color: #9e71e6;
+    font-weight: 900;
+}
+.hero-subtitle {
+    color: #6867a5;
+    font-size: 1.14rem;
+    margin-bottom: 38px;
+}
+.hero-cta {
+    margin-bottom: 38px;
+}
+.btn {
+    background: linear-gradient(90deg, #7b7ce9, #9e71e6);
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    padding: 14px 38px;
+    font-size: 1.09rem;
+    font-weight: 600;
+    margin: 0 10px 10px 0;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(123,124,233,0.14);
+    text-decoration: none;
+    transition: background 0.15s, box-shadow 0.15s;
+    display: inline-block;
+}
+.btn:hover {
+    background: linear-gradient(90deg, #5b5bd6, #7b7ce9);
+    box-shadow: 0 8px 24px rgba(123,124,233,0.19);
+}
+.btn-secondary {
+    background: #f3f3fa;
+    color: #7b7ce9;
+    font-weight: 700;
+    box-shadow: none;
+}
+.btn-secondary:hover {
+    background: #ececf7;
+    color: #6a6bcf;
+}
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    margin-top: 22px;
+}
+.feature {
+    background: #f6f7fb;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(123,124,233,0.07);
+    padding: 20px 28px;
+    min-width: 130px;
+    text-align: center;
+    font-size: 1.05rem;
+    color: #7b7ce9;
+}
+.feature .icon {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 9px;
+}
+
+/* Dashboard */
+.dashboard-hero {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 60px;
+}
+.dashboard-box {
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 10px 40px rgba(123,124,233,0.09);
+    padding: 44px 40px 36px 40px;
+    max-width: 880px;
+    width: 96%;
+    text-align: center;
+}
+.dashboard-title {
+    font-size: 2.1rem;
+    color: #7b7ce9;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+.dashboard-subtitle {
+    color: #6867a5;
+    font-size: 1.11rem;
+    margin-bottom: 38px;
+}
+.dashboard-cards {
+    display: flex;
+    justify-content: center;
+    gap: 34px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+.dashboard-card {
+    background: #f7f8fc;
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(123,124,233,0.08);
+    padding: 36px 38px 24px 38px;
+    min-width: 150px;
+    min-height: 100px;
+    text-align: center;
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #7b7ce9;
+    text-decoration: none;
+    transition: box-shadow 0.13s, transform 0.13s, background 0.13s, color 0.13s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.dashboard-card .icon {
+    font-size: 2.1rem;
+    margin-bottom: 13px;
+    display: block;
+}
+.dashboard-card:hover {
+    box-shadow: 0 8px 28px rgba(123,124,233,0.16);
+    background: linear-gradient(100deg, #f4f4ff 55%, #e8e3ff 100%);
+    color: #5b5bd6;
+    transform: translateY(-2px) scale(1.035);
+}
+.dashboard-logout {
+    text-align: right;
+}
+.logout {
+    color: #7b7ce9;
+    text-decoration: underline;
+    font-size: 1.07rem;
+    font-weight: 600;
+}
+.logout:hover {
+    color: #9e71e6;
+}
+
+/* Responsive design */
+@media (max-width: 950px) {
+    .dashboard-cards, .features {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+    .main-box, .dashboard-box {
+        padding: 36px 10px 24px 10px;
+        max-width: 98vw;
+    }
+}
