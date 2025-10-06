@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $error = '';
 $success = '';
-$photos_dir = __DIR__ . 'MBusers/photos/';
+$photos_dir = __DIR__ . '/MBusers/photos/';
 $web_photos_dir = 'MBusers/photos/';
 
 if (!is_dir($photos_dir)) {
