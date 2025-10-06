@@ -93,60 +93,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<div class="dashboard-hero">
-    <div class="dashboard-box" style="max-width: 950px;">
-        <h2 class="dashboard-title" style="margin-bottom: 10px;">Messages</h2>
-        <div style="display:flex;gap:38px;">
-            <!-- Matches sidebar -->
-            <div style="min-width:210px;">
-                <div style="font-weight:600;margin-bottom:12px;">Your Matches</div>
-                <?php if (empty($matches)): ?>
-                    <div style="color:#7b7ce9;">No matches yet.</div>
-                <?php else: ?>
-                    <?php foreach ($matches as $match): ?>
-                        <div style="margin-bottom:10px;">
-                            <a href="messages.php?match=<?php echo $match['match_id']; ?>"
-                               style="color:<?php echo ($selected_match == $match['match_id']) ? '#5b5bd6' : '#7b7ce9'; ?>;font-weight:<?php echo ($selected_match == $match['match_id']) ? '700' : '500'; ?>;text-decoration:underline;">
-                               <?php
-                                   echo htmlspecialchars($match['name'] ?: $match['email']);
-                                   if ($match['age']) echo " ({$match['age']})";
-                               ?>
-                            </a>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+
+<main class="container">
+    <section class="card" style="max-width:950px;margin:0 auto">
+        <div class="page-top">
+            <div>
+                <h2 class="page-title">Messages</h2>
+                <p class="lead">Conversations with your matches</p>
             </div>
-            <!-- Conversation -->
-            <div style="flex:1;">
-                <?php if (!$selected_match): ?>
-                    <div style="color:#7b7ce9;">Select a match to view or send messages.</div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:220px 1fr;gap:28px;align-items:start">
+            <aside>
+                <div style="font-weight:700;margin-bottom:12px">Your Matches</div>
+                <?php if (empty($matches)): ?>
+                    <div class="muted">No matches yet.</div>
                 <?php else: ?>
-                    <div style="max-height:340px;overflow-y:auto;background:#f7f8fc;padding:18px 12px 18px 18px;border-radius:16px;margin-bottom:18px;">
+                    <nav class="form-row">
+                        <?php foreach ($matches as $match): ?>
+                            <?php $isActive = ($selected_match == $match['match_id']); ?>
+                            <a href="messages.php?match=<?php echo $match['match_id']; ?>" class="dashboard-link" style="padding:10px 12px;display:block;">
+                                <svg aria-hidden="true"><use xlink:href="assets/icons.svg#icon-profile"></use></svg>
+                                <div style="margin-left:8px">
+                                    <div class="label" style="font-weight:<?php echo $isActive ? '800' : '600'; ?>;color:var(--text)"><?php echo htmlspecialchars($match['name'] ?: $match['email']); if ($match['age']) echo " ({$match['age']})"; ?></div>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    </nav>
+                <?php endif; ?>
+            </aside>
+
+            <section>
+                <?php if (!$selected_match): ?>
+                    <div class="muted">Select a match to view or send messages.</div>
+                <?php else: ?>
+                    <div style="max-height:420px;overflow-y:auto;padding:12px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));margin-bottom:18px">
                         <?php if (empty($messages)): ?>
-                            <div style="color:#bdbfcf;">No messages yet. Say hi!</div>
+                            <div class="muted">No messages yet. Say hi!</div>
                         <?php else: ?>
                             <?php foreach ($messages as $msg): ?>
-                                <div style="margin-bottom:14px;">
-                                    <span style="color:#7b7ce9;font-weight:600;">
-                                        <?php echo htmlspecialchars($msg['sender_id'] == $user_id ? 'You' : ($msg['sender_name'] ?: 'Match')); ?>
-                                    </span>
-                                    <span style="color:#aaa;font-size:0.93em;">
-                                        <?php echo date('M d, H:i', strtotime($msg['time'])); ?>
-                                    </span>
-                                    <div style="margin-top:2px;"><?php echo nl2br(htmlspecialchars($msg['text'])); ?></div>
+                                <div style="margin-bottom:14px">
+                                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                                        <div style="font-weight:700;color:var(--text)"><?php echo htmlspecialchars($msg['sender_id'] == $user_id ? 'You' : ($msg['sender_name'] ?: 'Match')); ?></div>
+                                        <div class="muted" style="font-size:0.9rem"><?php echo date('M d, H:i', strtotime($msg['time'])); ?></div>
+                                    </div>
+                                    <div style="padding:10px 12px;border-radius:10px;background:rgba(0,0,0,0.04);color:var(--text)"><?php echo nl2br(htmlspecialchars($msg['text'])); ?></div>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
-                    <form method="POST" style="display:flex;gap:12px;">
-                        <input type="text" name="message" placeholder="Type your message..." required style="flex:1;padding:12px 16px;border-radius:10px;border:1px solid #e0e3ee;">
-                        <button type="submit" class="btn" style="padding:12px 28px;">Send</button>
+
+                    <form method="POST" style="display:flex;gap:12px;align-items:center">
+                        <input type="text" name="message" placeholder="Type your message..." required style="flex:1;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:var(--text)">
+                        <button type="submit" class="btn btn-hero">Send</button>
                     </form>
                 <?php endif; ?>
-            </div>
+            </section>
         </div>
-        <a href="index.php" style="display:block;margin-top:40px;color:#aaa;text-decoration:underline;font-size:0.95em;">&#8592; Back to Dashboard</a>
-    </div>
-</div>
+
+        <div style="margin-top:20px">
+            <a href="index.php" class="btn-ghost">← Back to Dashboard</a>
+        </div>
+    </section>
+</main>
+
+<?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>

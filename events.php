@@ -55,54 +55,55 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'])) {
     header("Location: events.php");
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>Events | Meet Beyond</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="assets/style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<div class="dashboard-hero">
-    <div class="dashboard-box" style="max-width:900px;">
-        <h2 class="dashboard-title" style="margin-bottom: 10px;">Events</h2>
-        <p class="dashboard-subtitle" style="margin-bottom: 34px;">Join virtual or in-person events to connect with others!</p>
-        <div class="dashboard-cards" style="flex-wrap:wrap;">
-            <?php if (empty($events)): ?>
-                <div style="width:100%;padding:40px 0;color:#7b7ce9;font-size:1.1rem;">
-                    No events available at the moment.
-                </div>
-            <?php else: ?>
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+
+<main class="container">
+    <div class="card">
+        <h2 class="page-title">Events</h2>
+        <p class="lead">Join virtual or in-person events to connect with others!</p>
+
+        <?php if (empty($events)): ?>
+            <div class="text-center" style="padding:36px 0;color:var(--muted);">No events available at the moment.</div>
+        <?php else: ?>
+            <div class="grid">
                 <?php foreach ($events as $event): ?>
-                <div class="dashboard-card" style="min-width:250px;max-width:350px;">
-                    <span class="icon" style="font-size:2.2rem;">
-                        <?php echo $event['type'] === 'virtual' ? '💻' : '📍'; ?>
-                    </span>
-                    <div style="font-weight:700;margin-bottom:6px;"><?php echo htmlspecialchars($event['title']); ?></div>
-                    <div style="font-size:0.98em;color:#6867a5;margin-bottom:10px;"><?php echo htmlspecialchars($event['desc']); ?></div>
-                    <div style="color:#5b5bd6;font-size:0.97em;margin-bottom:6px;">
-                        <?php echo date('M d, Y H:i', strtotime($event['dt'])); ?>
-                        <?php if ($event['loc']) echo " | " . htmlspecialchars($event['loc']); ?>
+                <div class="card">
+                    <div style="font-size:1.9rem;margin-bottom:6px;"><?php echo $event['type'] === 'virtual' ? '💻' : '📍'; ?></div>
+                    <div style="font-weight:800;margin-bottom:6px;"><?php echo htmlspecialchars($event['title']); ?></div>
+                    <div style="font-size:0.98rem;color:var(--muted);margin-bottom:10px;"><?php echo htmlspecialchars($event['desc']); ?></div>
+                    <div style="color:var(--accent);font-size:0.97rem;margin-bottom:6px;">
+                        <?php echo date('M d, Y H:i', strtotime($event['dt'])); ?><?php if ($event['loc']) echo ' | ' . htmlspecialchars($event['loc']); ?>
                     </div>
-                    <div style="color:#aaa;font-size:0.96em;margin-bottom:9px;">
-                        <?php echo ucfirst($event['type']); ?> Event | <?php echo (int)$event['count']; ?> participant<?php echo $event['count'] == 1 ? '' : 's'; ?>
+                    <div style="color:var(--muted);font-size:0.95rem;margin-bottom:8px;">
+                        <?php echo ucfirst($event['type']); ?> · <?php echo (int)$event['count']; ?> participant<?php echo $event['count'] == 1 ? '' : 's'; ?>
                     </div>
                     <form method="POST">
                         <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
                         <?php if ($event['my_status']): ?>
-                            <button type="submit" name="action" value="cancel" class="btn btn-secondary" style="width:100%;">Cancel Registration</button>
+                            <button type="submit" name="action" value="cancel" class="btn btn-ghost">Cancel Registration</button>
                         <?php else: ?>
-                            <button type="submit" name="action" value="join" class="btn" style="width:100%;">Join Event</button>
+                            <button type="submit" name="action" value="join" class="btn">Join Event</button>
                         <?php endif; ?>
                     </form>
                 </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-        <a href="index.php" style="display:block;margin-top:40px;color:#aaa;text-decoration:underline;font-size:0.95em;">&#8592; Back to Dashboard</a>
+            </div>
+        <?php endif; ?>
+
     </div>
-</div>
+</main>
+
+<?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>

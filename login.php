@@ -42,28 +42,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<div class="main-hero">
-    <div class="main-box" style="max-width: 420px;">
-        <h2 class="hero-title" style="margin-bottom: 8px;">Sign In</h2>
-        <p class="hero-subtitle" style="margin-bottom: 26px;">Welcome back! Please sign in to continue.</p>
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+
+<main class="container">
+    <div class="card" style="max-width:480px;margin:0 auto">
+        <h2 class="page-title">Sign In</h2>
+        <p class="lead">Welcome back! Please sign in to continue.</p>
+
         <?php if ($error): ?>
-            <div style="background:#ffe5e5;color:#ae2222;padding:10px 0;margin-bottom:18px;border-radius:10px;">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
+            <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
-        <form method="POST" autocomplete="off">
-            <input type="email" name="email" placeholder="Email" required 
-                   style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
-            <input type="password" name="password" placeholder="Password" required 
-                   style="width:90%;padding:14px;margin-bottom:24px;border-radius:10px;border:1px solid #e0e3ee;">
-            <button type="submit" class="btn" style="width:90%;">Sign In</button>
+
+        <form method="POST" autocomplete="off" class="form-row" style="margin-top:6px">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="btn-hero">Sign In</button>
         </form>
-        <p style="margin-top:20px;color:#7b7ce9;font-size:0.97em;">
-            Don't have an account? 
-            <a href="register.php" style="color:#9e71e6;text-decoration:underline;">Register</a>
-        </p>
-        <a href="index.php" style="display:block;margin-top:30px;color:#aaa;text-decoration:underline;font-size:0.95em;">&#8592; Back to Home</a>
+
+        <p class="form-note">Don't have an account? <a href="register.php" class="btn-ghost">Register</a></p>
+    <p class="form-note"><a href="index.php" class="btn-ghost"><svg aria-hidden="true" style="width:16px;height:16px;vertical-align:middle"><use xlink:href="assets/icons.svg#icon-back"></use></svg> Back to Home</a></p>
     </div>
-</div>
+</main>
 </body>
 </html>

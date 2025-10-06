@@ -52,35 +52,53 @@ if ($matches) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<div class="dashboard-hero">
-    <div class="dashboard-box">
-        <h2 class="dashboard-title" style="margin-bottom: 10px;">Your Matches</h2>
-        <p class="dashboard-subtitle" style="margin-bottom: 34px;">Start a conversation or view profiles below.</p>
-        <div class="dashboard-cards">
-            <?php if (empty($matches)): ?>
-                <div style="width:100%;padding:40px 0;color:#7b7ce9;font-size:1.1rem;">
-                    You don’t have any matches yet.
-                </div>
-            <?php else: ?>
-                <?php foreach ($matches as $match): 
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+
+<main class="container">
+    <section class="card" style="max-width:980px;margin:0 auto">
+        <div class="page-top">
+            <h2 class="page-title">Your Matches</h2>
+            <p class="lead">Start a conversation or view profiles below.</p>
+        </div>
+
+        <?php if (empty($matches)): ?>
+            <div class="muted" style="padding:36px 0;margin-top:12px">You don’t have any matches yet.</div>
+        <?php else: ?>
+            <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:18px">
+                <?php foreach ($matches as $match):
                     $profile = $profiles[$match['matched_user_id']];
                     $display_name = $profile['name'] ?: $profile['email'];
                     $display_age = $profile['age'] ? " ({$profile['age']})" : "";
                 ?>
-                <div class="dashboard-card" style="min-width:200px;">
-                    <span class="icon" style="font-size:2.3rem;">🤝</span>
-                    <div style="font-weight:700;margin-bottom:8px;"><?php echo htmlspecialchars($display_name . $display_age); ?></div>
-                    <div style="margin-bottom:14px;">
-                        <a href="profile.php?user=<?php echo $profile['id']; ?>" style="color:#7b7ce9;text-decoration:underline;font-size:0.97em;">View Profile</a>
-                        <br>
-                        <a href="messages.php?match=<?php echo $match['match_id']; ?>" style="color:#9e71e6;text-decoration:underline;font-size:0.97em;">Message</a>
-                    </div>
-                </div>
+                    <article class="profile-card">
+                        <div class="profile-top" style="align-items:center;gap:12px">
+                            <?php if (!empty($profile['photo'])): ?>
+                                <img src="MBusers/photos/<?php echo $profile['photo']; ?>" alt="<?php echo htmlspecialchars($display_name); ?>" class="avatar" style="width:64px;height:64px;border-radius:10px;object-fit:cover">
+                            <?php else: ?>
+                                <div class="avatar" style="width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,var(--accent-2),var(--accent));"></div>
+                            <?php endif; ?>
+                            <div>
+                                <div class="label" style="font-weight:800"><?php echo htmlspecialchars($display_name . $display_age); ?></div>
+                                <div class="muted" style="font-size:0.9rem"><?php if ($profile['age']) echo $profile['age'] . ' yrs'; ?></div>
+                            </div>
+                        </div>
+
+                        <div class="profile-actions" style="margin-top:12px;display:flex;gap:8px">
+                            <a class="btn-ghost" href="profile.php?user=<?php echo $profile['id']; ?>"><svg aria-hidden><use xlink:href="assets/icons.svg#icon-view"></use></svg> View</a>
+                            <a class="btn" href="messages.php?match=<?php echo $match['match_id']; ?>"><svg aria-hidden><use xlink:href="assets/icons.svg#icon-messages"></use></svg> Message</a>
+                        </div>
+                    </article>
                 <?php endforeach; ?>
-            <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <div style="margin-top:24px">
+            <a href="index.php" class="btn-ghost">← Back to Dashboard</a>
         </div>
-        <a href="index.php" style="display:block;margin-top:40px;color:#aaa;text-decoration:underline;font-size:0.95em;">&#8592; Back to Dashboard</a>
-    </div>
-</div>
+    </section>
+</main>
+
+<?php include_once __DIR__ . '/includes/footer.php'; ?>
+
 </body>
 </html>

@@ -55,6 +55,14 @@ if ($is_logged_in) {
     $stmt->fetch();
     $stmt->close();
 
+    // Fetch primary photo path for avatar
+    $stmt = $conn->prepare("SELECT file_path FROM Photos WHERE user_id=? AND is_primary=1 AND is_active=1 LIMIT 1");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+    $stmt->execute();
+    $stmt->bind_result($avatar_path);
+    $has_avatar = $stmt->fetch();
+    $stmt->close();
+
     $user_name = $name ?: $email;
 }
 ?>
@@ -67,63 +75,79 @@ if ($is_logged_in) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<?php if (!$is_logged_in): ?>
-    <div class="main-hero">
-        <div class="main-box">
-            <h1 class="hero-title">Welcome to <span class="brand">Meet Beyond</span></h1>
-            <p class="hero-subtitle">Your platform for authentic connections. Join thousands of people finding meaningful relationships every day.</p>
-            <div class="hero-cta">
-                <a href="register.php" class="btn">Get Started</a>
-                <a href="browse.php" class="btn btn-secondary">Browse Profiles</a>
-            </div>
-            <div class="features">
-                <div class="feature">
-                    <span class="icon">🎯</span>
-                    <span>Smart Matching</span>
-                </div>
-                <div class="feature">
-                    <span class="icon">💬</span>
-                    <span>Safe Messaging</span>
-                </div>
-                <div class="feature">
-                    <span class="icon">🎉</span>
-                    <span>Real Events</span>
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+
+<main class="container">
+    <?php if (!$is_logged_in): ?>
+        <section class="card card-hero">
+            <div>
+                <h1 class="page-title">Welcome to <span class="brand"><span class="accent">Meet</span> Beyond</span></h1>
+                <p class="lead">Your platform for authentic connections. Join thousands of people finding meaningful relationships every day.</p>
+                <div class="hero-cta">
+                    <a href="register.php" class="btn-hero">Get Started</a>
+                    <a href="browse.php" class="btn btn-ghost">Browse Profiles</a>
                 </div>
             </div>
-        </div>
-    </div>
-<?php else: ?>
-    <div class="dashboard-hero">
-        <div class="dashboard-box">
-            <h1 class="dashboard-title">Hi, <?php echo htmlspecialchars($user_name); ?>!</h1>
-            <p class="dashboard-subtitle">Here’s your Meet Beyond dashboard. Ready to connect?</p>
-            <div class="dashboard-cards">
-                <a href="matches.php" class="dashboard-card">
-                    <span class="icon">❤️</span>
-                    <span>Matches</span>
-                </a>
-                <a href="messages.php" class="dashboard-card">
-                    <span class="icon">💬</span>
-                    <span>Messages</span>
-                </a>
-                <a href="profile.php" class="dashboard-card">
-                    <span class="icon">📝</span>
-                    <span>Edit Profile</span>
-                </a>
-                <a href="events.php" class="dashboard-card">
-                    <span class="icon">🎟️</span>
-                    <span>Events</span>
-                </a>
-                <a href="browse.php" class="dashboard-card">
-                    <span class="icon">🔍</span>
-                    <span>Browse</span>
-                </a>
+            <div style="margin-left:auto;min-width:260px;text-align:right">
+                <div class="muted">Smart Matching · Safe Messaging · Real Events</div>
             </div>
-            <div class="dashboard-logout">
-                <a href="logout.php" class="logout">Logout</a>
+        </section>
+    <?php else: ?>
+        <section class="card">
+            <div class="page-top">
+                <div>
+                    <h2 class="page-title">Hi, <?php echo htmlspecialchars($user_name); ?>!</h2>
+                    <p class="lead">Here’s your Meet Beyond dashboard. Ready to connect?</p>
+                </div>
+                <div class="muted">Welcome back</div>
             </div>
-        </div>
-    </div>
-<?php endif; ?>
+
+            <div class="dashboard-header-row">
+                <div class="dashboard-tiles-inline">
+                    <a class="tile-big dashboard-link accent-purple" href="profile.php">
+                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-profile"></use></svg></span>
+                        <div>
+                            <div class="label">Profile</div>
+                            <div class="sub">Edit your details</div>
+                        </div>
+                    </a>
+                    <a class="tile-big dashboard-link accent-teal" href="events.php">
+                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-events"></use></svg></span>
+                        <div>
+                            <div class="label">Events</div>
+                            <div class="sub">Nearby gatherings</div>
+                        </div>
+                    </a>
+                    <a class="tile-big dashboard-link accent-rose" href="browse.php">
+                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-browse"></use></svg></span>
+                        <div>
+                            <div class="label">Browse</div>
+                            <div class="sub">Explore profiles</div>
+                        </div>
+                    </a>
+                    <a class="tile-big dashboard-link" href="matches.php">
+                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-heart"></use></svg></span>
+                        <div>
+                            <div class="label">Matches</div>
+                            <div class="sub">See your top matches</div>
+                        </div>
+                    </a>
+                    <a class="tile-big dashboard-link" href="messages.php">
+                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-messages"></use></svg></span>
+                        <div>
+                            <div class="label">Messages</div>
+                            <div class="sub">Inbox & chats</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="dashboard-tile-grid">
+                    <!-- additional tiles or quick actions could go here -->
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+</main>
+
+<script src="assets/theme.js"></script>
 </body>
 </html>

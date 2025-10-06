@@ -59,51 +59,69 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Your Preferences | Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<div class="main-hero">
-    <div class="main-box" style="max-width:500px;">
-        <h2 class="hero-title" style="margin-bottom: 8px;">Your Preferences</h2>
-        <p class="hero-subtitle" style="margin-bottom: 32px;">Tell us what you're looking for!</p>
-        <?php if ($must_complete): ?>
-            <div style="background:#fff8e1;color:#b26a00;padding:10px 0;margin-bottom:18px;border-radius:10px;">
-                Please complete your preferences for better matches.
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+<main class="container">
+    <div class="card" style="max-width:680px;margin:0 auto">
+        <div class="page-top">
+            <div>
+                <h2 class="page-title">Your Preferences</h2>
+                <p class="lead">Tell us what you're looking for!</p>
             </div>
-        <?php endif; ?>
-        <?php if ($error): ?>
-            <div style="background:#ffe5e5;color:#ae2222;padding:10px 0;margin-bottom:18px;border-radius:10px;">
-                <?php echo htmlspecialchars($error); ?>
+            <div class="muted">
+                <?php if ($must_complete): ?>
+                    <span class="alert alert-warn" style="display:inline-block;padding:8px;border-radius:8px">Please complete your preferences for better matches.</span>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
-        <form method="POST" autocomplete="off">
-            <input type="number" name="min_age" placeholder="Minimum Age" value="<?php echo htmlspecialchars($min_age); ?>" min="18" max="120" required style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
-            <input type="number" name="max_age" placeholder="Maximum Age" value="<?php echo htmlspecialchars($max_age); ?>" min="18" max="120" required style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
+        </div>
 
-            <select name="gender_pref" required style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
-                <option value="">Interested In</option>
+        <?php if ($error): ?>
+            <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+
+        <form method="POST" autocomplete="off" class="form-row" novalidate>
+            <label for="min_age" class="muted">Minimum Age</label>
+            <input id="min_age" type="number" name="min_age" placeholder="Minimum Age" value="<?php echo htmlspecialchars($min_age); ?>" min="18" max="120" required>
+
+            <label for="max_age" class="muted">Maximum Age</label>
+            <input id="max_age" type="number" name="max_age" placeholder="Maximum Age" value="<?php echo htmlspecialchars($max_age); ?>" min="18" max="120" required>
+
+            <label for="gender_pref" class="muted">Interested In</label>
+            <select id="gender_pref" name="gender_pref" required aria-label="Interested In">
+                <option value="">Choose</option>
                 <option value="male" <?php if($gender_pref==='male') echo "selected"; ?>>Men</option>
                 <option value="female" <?php if($gender_pref==='female') echo "selected"; ?>>Women</option>
                 <option value="other" <?php if($gender_pref==='other') echo "selected"; ?>>Other</option>
             </select>
 
-            <input type="text" name="location" placeholder="Location" value="<?php echo htmlspecialchars($location); ?>" required style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
-            <select name="relationship_type" required style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
-                <option value="">Looking For</option>
+            <label for="location" class="muted">Location</label>
+            <input id="location" type="text" name="location" placeholder="Location" value="<?php echo htmlspecialchars($location); ?>" required>
+
+            <label for="relationship_type" class="muted">Looking For</label>
+            <select id="relationship_type" name="relationship_type" required aria-label="Looking For">
+                <option value="">Choose</option>
                 <option value="friendship" <?php if($relationship_type==='friendship') echo "selected"; ?>>Friendship</option>
                 <option value="dating" <?php if($relationship_type==='dating') echo "selected"; ?>>Dating</option>
                 <option value="long-term" <?php if($relationship_type==='long-term') echo "selected"; ?>>Long-term</option>
                 <option value="marriage" <?php if($relationship_type==='marriage') echo "selected"; ?>>Marriage</option>
                 <option value="networking" <?php if($relationship_type==='networking') echo "selected"; ?>>Networking</option>
             </select>
-            <input type="text" name="interests" placeholder="Interests (optional)" value="<?php echo htmlspecialchars($interests); ?>" style="width:90%;padding:14px;margin-bottom:24px;border-radius:10px;border:1px solid #e0e3ee;">
-            <button type="submit" class="btn" style="width:90%;">Save Preferences</button>
+
+            <label for="interests" class="muted">Interests (optional)</label>
+            <input id="interests" type="text" name="interests" placeholder="Interests (optional)" value="<?php echo htmlspecialchars($interests); ?>">
+
+            <div class="form-actions" style="display:flex;gap:12px;align-items:center;margin-top:6px">
+                <button type="submit" class="btn-hero">Save Preferences</button>
+                <a href="photos.php" class="btn-ghost">Next: Upload Photo</a>
+            </div>
         </form>
-        <a href="index.php" style="display:block;margin-top:30px;color:#aaa;text-decoration:underline;font-size:0.95em;">&#8592; Back to Dashboard</a>
     </div>
-</div>
+</main>
+<?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>
