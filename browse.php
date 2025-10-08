@@ -9,6 +9,19 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Check if user is admin - admins cannot use dating features
+$stmt = $conn->prepare("SELECT role FROM Users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($user_role);
+$stmt->fetch();
+$stmt->close();
+
+if ($user_role === 'admin') {
+    header('Location: admin.php');
+    exit;
+}
+
 // Fetch current user's preferences (for a real app, use these to filter users)
 $stmt = $conn->prepare("SELECT min_age, max_age, gender_pref, location FROM Preferences WHERE user_id=?");
 $stmt->bind_param("i", $user_id);
@@ -17,13 +30,16 @@ $stmt->bind_result($min_age, $max_age, $gender_pref, $location);
 $stmt->fetch();
 $stmt->close();
 
-// For now: fetch random users that are NOT the current user and have a primary photo, name, and age
+// Fetch random users (exclude current user, admins, and users without complete profiles)
 $sql = "
     SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path
     FROM Users u
     JOIN Profiles p ON u.id = p.user_id
     JOIN Photos ph ON ph.user_id = u.id AND ph.is_primary=1 AND ph.is_active=1
-    WHERE u.id != ? AND p.name IS NOT NULL AND p.age IS NOT NULL
+    WHERE u.id != ? 
+    AND u.role != 'admin'
+    AND p.name IS NOT NULL 
+    AND p.age IS NOT NULL
     ORDER BY RAND() 
     LIMIT 12
 ";

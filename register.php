@@ -3,7 +3,19 @@ session_start();
 require 'config.php';
 
 if (isset($_SESSION['user_id'])) {
-    header('Location: index.php');
+    // Check if user is admin and redirect accordingly
+    $stmt = $conn->prepare("SELECT role FROM Users WHERE id = ?");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+    $stmt->execute();
+    $stmt->bind_result($role);
+    $stmt->fetch();
+    $stmt->close();
+    
+    if ($role === 'admin') {
+        header('Location: admin.php');
+    } else {
+        header('Location: index.php');
+    }
     exit;
 }
 

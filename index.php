@@ -4,47 +4,78 @@ require 'config.php';
 
 $is_logged_in = isset($_SESSION['user_id']);
 $user_name = '';
+$is_admin = false;
 
 if ($is_logged_in) {
-    // 1. Ensure profile is complete (name, age, gender)
-    $stmt = $conn->prepare("SELECT name, age, gender FROM Profiles WHERE user_id=?");
+    // Check if user is admin
+    $stmt = $conn->prepare("SELECT role FROM Users WHERE id=?");
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
-    $stmt->bind_result($name, $age, $gender);
+    $stmt->bind_result($user_role);
     $stmt->fetch();
     $stmt->close();
-
-    if (empty($name) || empty($age) || empty($gender)) {
-        // Profile incomplete
-        header('Location: profile.php?complete=1');
+    
+    $is_admin = ($user_role === 'admin');
+    
+    // Redirect admins to admin panel immediately
+    if ($is_admin) {
+        header('Location: admin.php');
         exit;
     }
+    
+    // Profile completion checks for regular users
+    if (!$is_admin) {
+        // 1. Ensure profile is complete (name, age, gender)
+        $stmt = $conn->prepare("SELECT name, age, gender FROM Profiles WHERE user_id=?");
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $stmt->bind_result($name, $age, $gender);
+        $stmt->fetch();
+        $stmt->close();
 
-    // 2. Ensure preferences are complete (min_age, max_age, gender_pref, location, relationship_type)
-    $stmt = $conn->prepare("SELECT min_age, max_age, gender_pref, location, relationship_type FROM Preferences WHERE user_id=?");
-    $stmt->bind_param("i", $_SESSION['user_id']);
-    $stmt->execute();
-    $stmt->bind_result($min_age, $max_age, $gender_pref, $location, $relationship_type);
-    $stmt->fetch();
-    $stmt->close();
-
-    if (empty($min_age) || empty($max_age) || empty($gender_pref) || empty($location) || empty($relationship_type)) {
-        // Preferences incomplete
-        header('Location: preferences.php?complete=1');
-        exit;
+        if (empty($name) || empty($age) || empty($gender)) {
+            // Profile incomplete
+            header('Location: profile.php?complete=1');
+            exit;
+        }
+    } else {
+        // For admin, just fetch basic profile data
+        $stmt = $conn->prepare("SELECT name, age, gender FROM Profiles WHERE user_id=?");
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $stmt->bind_result($name, $age, $gender);
+        $stmt->fetch();
+        $stmt->close();
     }
 
-    // 3. Ensure a primary photo exists
-    $stmt = $conn->prepare("SELECT id FROM Photos WHERE user_id=? AND is_primary=1 AND is_active=1 LIMIT 1");
-    $stmt->bind_param("i", $_SESSION['user_id']);
-    $stmt->execute();
-    $stmt->bind_result($photo_id);
-    $has_primary_photo = $stmt->fetch();
-    $stmt->close();
+    // Skip remaining checks for admin users
+    if (!$is_admin) {
+        // 2. Ensure preferences are complete (min_age, max_age, gender_pref, location, relationship_type)
+        $stmt = $conn->prepare("SELECT min_age, max_age, gender_pref, location, relationship_type FROM Preferences WHERE user_id=?");
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $stmt->bind_result($min_age, $max_age, $gender_pref, $location, $relationship_type);
+        $stmt->fetch();
+        $stmt->close();
 
-    if (!$has_primary_photo) {
-        header('Location: photos.php?complete=1');
-        exit;
+        if (empty($min_age) || empty($max_age) || empty($gender_pref) || empty($location) || empty($relationship_type)) {
+            // Preferences incomplete
+            header('Location: preferences.php?complete=1');
+            exit;
+        }
+
+        // 3. Ensure a primary photo exists
+        $stmt = $conn->prepare("SELECT id FROM Photos WHERE user_id=? AND is_primary=1 AND is_active=1 LIMIT 1");
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $stmt->bind_result($photo_id);
+        $has_primary_photo = $stmt->fetch();
+        $stmt->close();
+
+        if (!$has_primary_photo) {
+            header('Location: photos.php?complete=1');
+            exit;
+        }
     }
 
     // Fetch email for fallback display
@@ -179,6 +210,21 @@ if ($is_logged_in) {
             </a>
         </div>
         <?php else: ?>
+        <?php if ($is_admin): ?>
+            <!-- Admin Dashboard Redirect Notice -->
+            <div class="card" style="text-align:center;padding:60px 40px;background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.15))">
+                <div style="font-size:4rem;margin-bottom:20px">🛡️</div>
+                <h1 style="font-size:2.2rem;font-weight:600;margin-bottom:16px;color:var(--text)">
+                    Admin Dashboard
+                </h1>
+                <p style="color:var(--muted);font-size:1.1rem;margin-bottom:32px">
+                    You have administrative privileges. Access the full admin panel to manage the platform.
+                </p>
+                <a href="admin.php" class="btn" style="padding:16px 32px;font-size:1.1rem">
+                    Go to Admin Panel →
+                </a>
+            </div>
+        <?php else: ?>
         <!-- Professional Dashboard Header -->
         <div style="margin-bottom:32px">
             <h1 style="font-size:2rem;font-weight:600;margin-bottom:8px;color:var(--text)">
@@ -267,6 +313,7 @@ if ($is_logged_in) {
                 </div>
             </a>
         </div>
+        <?php endif; ?>
     <?php endif; ?>
 </main>
 

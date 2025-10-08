@@ -8,6 +8,20 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+
+// Check if user is admin - admins cannot use dating features
+$stmt = $conn->prepare("SELECT role FROM Users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($user_role);
+$stmt->fetch();
+$stmt->close();
+
+if ($user_role === 'admin') {
+    header('Location: admin.php');
+    exit;
+}
+
 $message = '';
 
 // Handle like/pass actions
@@ -69,13 +83,14 @@ $stmt->bind_result($min_age, $max_age, $gender_pref);
 $stmt->fetch();
 $stmt->close();
 
-// Fetch next profile to show (exclude already liked/passed/blocked users)
+// Fetch next profile to show (exclude already liked/passed/blocked users and admins)
 $sql = "
     SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path
     FROM Users u
     JOIN Profiles p ON u.id = p.user_id
     JOIN Photos ph ON ph.user_id = u.id AND ph.is_primary=1 AND ph.is_active=1
     WHERE u.id != ?
+    AND u.role != 'admin'
     AND p.name IS NOT NULL 
     AND p.age IS NOT NULL
     AND p.visible = TRUE

@@ -11,16 +11,18 @@ if (!function_exists('mb_db_connected')) {
 
 $is_logged_in = isset($_SESSION['user_id']);
 $user_name = '';
+$is_admin = false;
 if ($is_logged_in) {
     $uid = $_SESSION['user_id'];
-    // Try to fetch display name; silent on failure
-    $tmp = $conn->prepare("SELECT name, email FROM Profiles p JOIN Users u ON u.id = p.user_id WHERE p.user_id = ? LIMIT 1");
+    // Try to fetch display name and role; silent on failure
+    $tmp = $conn->prepare("SELECT p.name, u.email, u.role FROM Profiles p JOIN Users u ON u.id = p.user_id WHERE p.user_id = ? LIMIT 1");
     if ($tmp) {
         $tmp->bind_param('i', $uid);
         $tmp->execute();
-        $tmp->bind_result($pname, $pemail);
+        $tmp->bind_result($pname, $pemail, $urole);
         if ($tmp->fetch()) {
             $user_name = $pname ?: $pemail;
+            $is_admin = ($urole === 'admin');
         }
         $tmp->close();
     }
@@ -45,7 +47,11 @@ if ($is_logged_in) {
     <a class="brand" href="index.php">Meet <span class="accent">Beyond</span></a>
     <nav class="nav">
         <?php if ($is_logged_in): ?>
-            <a href="discover.php">💖 Discover</a>
+            <?php if ($is_admin): ?>
+                <a href="admin.php">🛡️ Admin</a>
+            <?php else: ?>
+                <a href="discover.php">💖 Discover</a>
+            <?php endif; ?>
             <a href="browse.php">Browse</a>
             <a href="messages.php">Messages</a>
             <a href="profile_view.php">Profile</a>

@@ -3,7 +3,19 @@ session_start();
 require 'config.php';
 
 if (isset($_SESSION['user_id'])) {
-    header('Location: index.php');
+    // Check if user is admin and redirect accordingly
+    $stmt = $conn->prepare("SELECT role FROM Users WHERE id = ?");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+    $stmt->execute();
+    $stmt->bind_result($role);
+    $stmt->fetch();
+    $stmt->close();
+    
+    if ($role === 'admin') {
+        header('Location: admin.php');
+    } else {
+        header('Location: index.php');
+    }
     exit;
 }
 
@@ -12,17 +24,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT id, password_hash FROM Users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, password_hash, role FROM Users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows === 1) {
-        $stmt->bind_result($user_id, $hash);
+        $stmt->bind_result($user_id, $hash, $role);
         $stmt->fetch();
 
         if (password_verify($password, $hash)) {
             $_SESSION['user_id'] = $user_id;
-            header('Location: index.php');
+            
+            // Redirect admins to admin panel, regular users to index
+            if ($role === 'admin') {
+                header('Location: admin.php');
+            } else {
+                header('Location: index.php');
+            }
             exit;
         } else {
             $error = "Incorrect password.";
