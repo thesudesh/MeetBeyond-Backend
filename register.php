@@ -55,34 +55,53 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Register | Meet Beyond</title>
-    <link rel="stylesheet" href="assets/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<div class="main-hero">
-    <div class="main-box" style="max-width: 420px;">
-        <h2 class="hero-title" style="margin-bottom: 8px;">Create Account</h2>
-        <p class="hero-subtitle" style="margin-bottom: 26px;">Join Meet Beyond and start making meaningful connections.</p>
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+
+<main class="container" style="padding-top:36px; padding-bottom:36px;">
+    <section class="card card-hero" style="max-width:920px;margin:0 auto;">
+        <div class="page-top">
+            <div>
+                <h2 class="page-title">Create Account</h2>
+                <p class="lead">Join Meet Beyond and start making meaningful connections.</p>
+            </div>
+        </div>
+
         <?php if ($error): ?>
-            <div style="background:#ffe5e5;color:#ae2222;padding:10px 0;margin-bottom:18px;border-radius:10px;">
+            <div class="alert alert-error" role="alert" style="margin-bottom:16px;">
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
-        <form method="POST" autocomplete="off">
-            <input type="email" name="email" placeholder="Email" required 
-                   style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
-            <input type="password" name="password" placeholder="Password" required 
-                   style="width:90%;padding:14px;margin-bottom:18px;border-radius:10px;border:1px solid #e0e3ee;">
-            <input type="password" name="confirm" placeholder="Confirm Password" required 
-                   style="width:90%;padding:14px;margin-bottom:24px;border-radius:10px;border:1px solid #e0e3ee;">
-            <button type="submit" class="btn" style="width:90%;">Register</button>
+
+        <form method="POST" autocomplete="off" class="form-row" novalidate>
+            <label class="form-row">
+                <input id="email" type="email" name="email" placeholder="Email" required class="form-control">
+            </label>
+
+            <label class="form-row">
+                <input id="password" type="password" name="password" placeholder="Password" required class="form-control">
+            </label>
+
+            <label class="form-row">
+                <input id="confirm" type="password" name="confirm" placeholder="Confirm Password" required class="form-control">
+            </label>
+
+            <div class="form-row" style="margin-top:8px;">
+                <button type="submit" class="btn btn-hero" style="width:100%;">Create account</button>
+            </div>
+
+            <div class="form-row" style="justify-content:center;gap:8px;margin-top:12px;">
+                <span class="muted">Already have an account?</span>
+                <a class="btn btn-ghost" href="login.php">Sign In</a>
+            </div>
+
         </form>
-        <p style="margin-top:20px;color:#7b7ce9;font-size:0.97em;">
-            Already have an account?
-            <a href="login.php" style="color:#9e71e6;text-decoration:underline;">Sign In</a>
-        </p>
-        <a href="index.php" style="display:block;margin-top:30px;color:#aaa;text-decoration:underline;font-size:0.95em;">&#8592; Back to Home</a>
-    </div>
-</div>
+    </section>
+</main>
+
+<?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>

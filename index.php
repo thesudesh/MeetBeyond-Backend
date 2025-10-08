@@ -104,11 +104,11 @@ if ($is_logged_in) {
 
             <div class="dashboard-header-row">
                 <div class="dashboard-tiles-inline">
-                    <a class="tile-big dashboard-link accent-purple" href="profile.php">
+                    <a class="tile-big dashboard-link accent-purple" href="profile_view.php">
                         <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-profile"></use></svg></span>
                         <div>
                             <div class="label">Profile</div>
-                            <div class="sub">Edit your details</div>
+                            <div class="sub">View your profile</div>
                         </div>
                     </a>
                     <a class="tile-big dashboard-link accent-teal" href="events.php">
@@ -125,14 +125,14 @@ if ($is_logged_in) {
                             <div class="sub">Explore profiles</div>
                         </div>
                     </a>
-                    <a class="tile-big dashboard-link" href="matches.php">
+                    <a class="tile-big dashboard-link accent-rose" href="matches.php">
                         <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-heart"></use></svg></span>
                         <div>
                             <div class="label">Matches</div>
                             <div class="sub">See your top matches</div>
                         </div>
                     </a>
-                    <a class="tile-big dashboard-link" href="messages.php">
+                    <a class="tile-big dashboard-link accent-purple" href="messages.php">
                         <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-messages"></use></svg></span>
                         <div>
                             <div class="label">Messages</div>
