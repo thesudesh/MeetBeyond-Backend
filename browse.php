@@ -83,7 +83,7 @@ $photo_base = "MBusers/photos/";
                                 <button class="icon-btn" title="Pass" aria-label="Pass" onclick="alert('Pass feature coming soon!');">
                                     <svg aria-hidden="true"><use xlink:href="assets/icons.svg#icon-cross"></use></svg>
                                 </button>
-                                <a class="icon-btn view" title="View Profile" aria-label="View Profile" href="profile.php?user=<?php echo $u['id']; ?>">
+                                <a class="icon-btn view" title="View Profile" aria-label="View Profile" href="profile_view.php?id=<?php echo $u['id']; ?>">
                                     <svg aria-hidden="true"><use xlink:href="assets/icons.svg#icon-view"></use></svg>
                                 </a>
                                 <button class="icon-btn like" title="Like" aria-label="Like" onclick="alert('Like feature coming soon!');">
@@ -96,11 +96,10 @@ $photo_base = "MBusers/photos/";
             </div>
         <?php endif; ?>
 
-        <div class="text-center" style="margin-top:20px">
-            <a href="index.php" class="btn-ghost"><svg aria-hidden="true" style="width:16px;height:16px;vertical-align:middle"><use xlink:href="assets/icons.svg#icon-back"></use></svg> Back to Dashboard</a>
-        </div>
     </div>
 </main>
+
+<a href="index.php" class="back-btn" title="Back to Dashboard">←</a>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>

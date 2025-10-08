@@ -61,45 +61,55 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
 <?php include_once __DIR__ . '/includes/nav.php'; ?>
 
-<main class="container" style="padding-top:36px; padding-bottom:36px;">
-    <section class="card card-hero" style="max-width:920px;margin:0 auto;">
-        <div class="page-top">
-            <div>
-                <h2 class="page-title">Create Account</h2>
-                <p class="lead">Join Meet Beyond and start making meaningful connections.</p>
-            </div>
-        </div>
+<main class="container">
+    <div class="card" style="max-width:550px;margin:60px auto;text-align:center">
+        <div style="font-size:3.5rem;margin-bottom:20px">✨</div>
+        <h2 class="page-title" style="margin-bottom:12px">Join Meet Beyond</h2>
+        <p class="lead" style="margin-bottom:32px">Create your account and start connecting with amazing people</p>
 
         <?php if ($error): ?>
-            <div class="alert alert-error" role="alert" style="margin-bottom:16px;">
+            <div class="alert alert-error" role="alert" style="text-align:left">
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
 
-        <form method="POST" autocomplete="off" class="form-row" novalidate>
-            <label class="form-row">
-                <input id="email" type="email" name="email" placeholder="Email" required class="form-control">
-            </label>
-
-            <label class="form-row">
-                <input id="password" type="password" name="password" placeholder="Password" required class="form-control">
-            </label>
-
-            <label class="form-row">
-                <input id="confirm" type="password" name="confirm" placeholder="Confirm Password" required class="form-control">
-            </label>
-
-            <div class="form-row" style="margin-top:8px;">
-                <button type="submit" class="btn btn-hero" style="width:100%;">Create account</button>
+        <form method="POST" autocomplete="off" style="text-align:left">
+            <div class="form-row">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+                    <span style="font-size:1.2rem">📧</span> Email Address
+                </label>
+                <input id="email" type="email" name="email" placeholder="your@email.com" required>
             </div>
 
-            <div class="form-row" style="justify-content:center;gap:8px;margin-top:12px;">
-                <span class="muted">Already have an account?</span>
-                <a class="btn btn-ghost" href="login.php">Sign In</a>
+            <div class="form-row">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+                    <span style="font-size:1.2rem">🔒</span> Password
+                </label>
+                <input id="password" type="password" name="password" placeholder="At least 6 characters" required>
+                <small style="color:var(--muted);font-size:0.85rem">Must be at least 6 characters long</small>
             </div>
 
+            <div class="form-row">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+                    <span style="font-size:1.2rem">✓</span> Confirm Password
+                </label>
+                <input id="confirm" type="password" name="confirm" placeholder="Re-enter your password" required>
+            </div>
+
+            <button type="submit" class="btn" style="width:100%;justify-content:center;padding:16px;margin-top:24px;font-size:1.05rem">
+                Create My Account →
+            </button>
         </form>
-    </section>
+
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1)">
+            <p style="color:var(--muted);margin-bottom:16px">Already have an account?</p>
+            <a href="login.php" class="btn-ghost" style="display:inline-flex">Sign In</a>
+        </div>
+
+        <div style="margin-top:20px">
+            <a href="index.php" style="color:var(--muted);font-size:0.95rem">← Back to Home</a>
+        </div>
+    </div>
 </main>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>

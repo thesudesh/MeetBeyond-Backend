@@ -61,42 +61,51 @@ if ($matches) {
             <p class="lead">Start a conversation or view profiles below.</p>
         </div>
 
-        <?php if (empty($matches)): ?>
-            <div class="muted" style="padding:36px 0;margin-top:12px">You don’t have any matches yet.</div>
+                <?php if (empty($matches)): ?>
+            <div class="text-center" style="padding:60px 20px;color:var(--muted)">
+                <div style="font-size:3rem;margin-bottom:16px">💑</div>
+                <h3 style="font-size:1.3rem;margin-bottom:8px;color:var(--text)">No matches yet</h3>
+                <p style="margin-bottom:24px">Keep browsing profiles to find your perfect match!</p>
+                <a href="browse.php" class="btn">Start Browsing</a>
+            </div>
         <?php else: ?>
-            <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:18px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:24px">
                 <?php foreach ($matches as $match):
                     $profile = $profiles[$match['matched_user_id']];
                     $display_name = $profile['name'] ?: $profile['email'];
                     $display_age = $profile['age'] ? " ({$profile['age']})" : "";
                 ?>
-                    <article class="profile-card">
-                        <div class="profile-top" style="align-items:center;gap:12px">
+                    <article style="background:var(--panel-bg);border-radius:14px;padding:24px;border:1px solid rgba(255,255,255,0.08);transition:var(--transition)">
+                        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
                             <?php if (!empty($profile['photo'])): ?>
-                                <img src="MBusers/photos/<?php echo $profile['photo']; ?>" alt="<?php echo htmlspecialchars($display_name); ?>" class="avatar" style="width:64px;height:64px;border-radius:10px;object-fit:cover">
+                                <img src="MBusers/photos/<?php echo $profile['photo']; ?>" alt="<?php echo htmlspecialchars($display_name); ?>" style="width:70px;height:70px;border-radius:12px;object-fit:cover;border:2px solid rgba(255,255,255,0.1)">
                             <?php else: ?>
-                                <div class="avatar" style="width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,var(--accent-2),var(--accent));"></div>
+                                <div style="width:70px;height:70px;border-radius:12px;background:linear-gradient(135deg,var(--accent-purple),var(--accent-pink));display:flex;align-items:center;justify-content:center;font-size:2rem">
+                                    <?php echo strtoupper(substr($display_name, 0, 1)); ?>
+                                </div>
                             <?php endif; ?>
-                            <div>
-                                <div class="label" style="font-weight:800"><?php echo htmlspecialchars($display_name . $display_age); ?></div>
-                                <div class="muted" style="font-size:0.9rem"><?php if ($profile['age']) echo $profile['age'] . ' yrs'; ?></div>
+                            <div style="flex:1">
+                                <div style="font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:4px">
+                                    <?php echo htmlspecialchars($display_name); ?>
+                                </div>
+                                <div style="color:var(--muted);font-size:0.95rem">
+                                    <?php if ($profile['age']) echo $profile['age'] . ' years old'; ?>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="profile-actions" style="margin-top:12px;display:flex;gap:8px">
-                            <a class="btn-ghost" href="profile.php?user=<?php echo $profile['id']; ?>"><svg aria-hidden><use xlink:href="assets/icons.svg#icon-view"></use></svg> View</a>
-                            <a class="btn" href="messages.php?match=<?php echo $match['match_id']; ?>"><svg aria-hidden><use xlink:href="assets/icons.svg#icon-messages"></use></svg> Message</a>
+                        <div style="display:flex;gap:10px">
+                            <a class="btn-ghost" style="flex:1;justify-content:center;font-size:0.95rem" href="profile_view.php?id=<?php echo $profile['id']; ?>">View Profile</a>
+                            <a class="btn" style="flex:1;justify-content:center;font-size:0.95rem" href="messages.php?match=<?php echo $match['match_id']; ?>">💬 Message</a>
                         </div>
                     </article>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
-
-        <div style="margin-top:24px">
-            <a href="index.php" class="btn-ghost">← Back to Dashboard</a>
-        </div>
     </section>
 </main>
+
+<a href="index.php" class="back-btn" title="Back to Dashboard">←</a>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
 

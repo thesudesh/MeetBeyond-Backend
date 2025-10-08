@@ -25,36 +25,65 @@ $stmt->bind_result($primary_photo_id, $primary_photo_path);
 $has_primary = $stmt->fetch();
 $stmt->close();
 
-// Handle upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo'])) {
-    $files = $_FILES['photo'];
-    $is_primary = isset($_POST['is_primary']) ? 1 : 0;
+// Handle photo deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_photo'])) {
+    if ($has_primary) {
+        // Delete physical file
+        $file_to_delete = $photos_dir . $primary_photo_path;
+        if (file_exists($file_to_delete)) {
+            unlink($file_to_delete);
+        }
+        // Mark as inactive in database
+        $stmt = $conn->prepare("UPDATE Photos SET is_active=0 WHERE id=?");
+        $stmt->bind_param("i", $primary_photo_id);
+        $stmt->execute();
+        $stmt->close();
+        $success = "Photo deleted successfully!";
+        $has_primary = false;
+        $primary_photo_path = '';
+    }
+}
 
-    for ($i=0; $i < count($files['name']); $i++) {
-        if ($files['error'][$i] === UPLOAD_ERR_OK) {
-            $tmp_name = $files['tmp_name'][$i];
-            $orig_name = basename($files['name'][$i]);
-            $ext = strtolower(pathinfo($orig_name, PATHINFO_EXTENSION));
-            if (!in_array($ext, ['jpg','jpeg','png','gif'])) {
-                $error = "Only JPG, PNG, GIF files allowed.";
-                continue;
+// Handle upload (single photo only)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+    $tmp_name = $_FILES['photo']['tmp_name'];
+    $orig_name = basename($_FILES['photo']['name']);
+    $ext = strtolower(pathinfo($orig_name, PATHINFO_EXTENSION));
+    
+    if (!in_array($ext, ['jpg','jpeg','png','gif'])) {
+        $error = "Only JPG, PNG, GIF files allowed.";
+    } else {
+        // If user already has a photo, delete the old one
+        if ($has_primary) {
+            $old_file = $photos_dir . $primary_photo_path;
+            if (file_exists($old_file)) {
+                unlink($old_file);
             }
-            $new_name = "user{$user_id}_" . uniqid() . "." . $ext;
-            $dest_path = $photos_dir . $new_name;
-            if (move_uploaded_file($tmp_name, $dest_path)) {
-                if ($is_primary) {
-                    $conn->query("UPDATE Photos SET is_primary=0 WHERE user_id=$user_id");
-                }
-                $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary) VALUES (?, ?, ?)");
-                $stmt->bind_param("isi", $user_id, $new_name, $is_primary);
-                $stmt->execute();
-                $stmt->close();
-                $success = "Photo uploaded!";
-            } else {
-                $error = "Failed to upload photo.";
+            // Mark old photo as inactive
+            $conn->query("UPDATE Photos SET is_active=0 WHERE user_id=$user_id");
+        }
+        
+        $new_name = "user{$user_id}_" . uniqid() . "." . $ext;
+        $dest_path = $photos_dir . $new_name;
+        
+        if (move_uploaded_file($tmp_name, $dest_path)) {
+            // Insert new photo as primary
+            $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary, is_active) VALUES (?, ?, 1, 1)");
+            $stmt->bind_param("is", $user_id, $new_name);
+            $stmt->execute();
+            $stmt->close();
+            $success = "Photo uploaded successfully!";
+            
+            // Redirect to dashboard if this completes the profile
+            if (isset($_GET['complete'])) {
+                header('Location: index.php');
+                exit;
             }
+        } else {
+            $error = "Failed to upload photo.";
         }
     }
+    
     // Re-check for primary photo
     $stmt = $conn->prepare("SELECT id, file_path FROM Photos WHERE user_id=? AND is_primary=1 AND is_active=1 LIMIT 1");
     $stmt->bind_param("i", $user_id);
@@ -64,54 +93,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo'])) {
     $stmt->close();
 }
 
-// If primary photo uploaded, show "complete" page
-if ($has_primary) {
+// If primary photo exists and user wants to manage it, show management page
+if ($has_primary && !isset($_GET['complete'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile Complete | Meet Beyond</title>
+    <title>Manage Photo | Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        .complete-card {
-            background: #fff8fa;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px #efefff22;
-            padding: 44px 32px 36px 32px;
-            text-align: center;
-            max-width: 430px;
-            margin: 70px auto 0 auto;
-        }
-        .complete-card img {
-            width: 130px;
-            height: 130px;
-            object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 2px 18px #e6c7fd44;
-            margin-bottom: 30px;
-            border: 6px solid #fff;
-        }
-        .cheesy-line {
-            color: #a06ee5;
-            font-size: 1.13em;
-            margin: 15px 0 20px 0;
-        }
-    </style>
 </head>
 <body>
-    <div class="complete-card">
-        <div style="font-size:2.4em;margin-bottom:10px;">🎉</div>
-        <h2 style="margin-bottom: 18px;">Your profile is now complete!</h2>
-        <img src="<?php echo $web_photos_dir . htmlspecialchars($primary_photo_path); ?>">
-        <div class="cheesy-line">
-            Welcome to <span class="brand">Meet Beyond</span>, where<br>
-            <b>connections turn into stories</b>!<br>
-            Your new adventure starts now.
+<?php include_once __DIR__ . '/includes/nav.php'; ?>
+
+<main class="container">
+    <div class="card" style="max-width:600px;margin:40px auto">
+        <h2 class="page-title">Your Profile Photo</h2>
+        <p class="lead">Make a great first impression with your photo</p>
+        
+        <?php if ($success): ?>
+            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
+        
+        <div style="text-align:center;margin:32px 0">
+            <img src="<?php echo $web_photos_dir . htmlspecialchars($primary_photo_path); ?>" 
+                 style="width:200px;height:200px;object-fit:cover;border-radius:50%;border:4px solid rgba(255,255,255,0.2);box-shadow:var(--shadow-lg)">
         </div>
-        <a href="index.php" class="btn" style="width:90%;font-size:1.08em;">Go to Dashboard</a>
+        
+        <div style="display:flex;flex-direction:column;gap:16px">
+            <form method="POST" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:16px">
+                <label class="btn" style="cursor:pointer;text-align:center">
+                    <input type="file" name="photo" accept="image/*" style="display:none" onchange="this.form.submit()">
+                    📸 Change Photo
+                </label>
+            </form>
+            
+            <form method="POST" onsubmit="return confirm('Are you sure you want to delete your photo?')">
+                <button type="submit" name="delete_photo" value="1" class="btn-ghost" style="width:100%;justify-content:center">
+                    🗑️ Delete Photo
+                </button>
+            </form>
+            
+        </div>
     </div>
+</main>
+
+<a href="index.php" class="back-btn" title="Back to Dashboard">←</a>
+
+<?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>
 <?php
@@ -125,128 +155,56 @@ exit;
     <title>Upload Your Photo | Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        .photo-card {
-            background: #fff6fa;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px #efefff22;
-            padding: 40px 30px 30px 30px;
-            max-width: 430px;
-            margin: 70px auto 0 auto;
-            text-align: center;
-        }
-        .drop-zone {
-            border: 2px dashed #a06ee5;
-            border-radius: 15px;
-            background: #f7f1ff;
-            padding: 30px 10px 20px 10px;
-            margin-bottom: 22px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .drop-zone input[type="file"] {
-            display: none;
-        }
-        .drop-label {
-            font-size: 2.2em;
-            color: #a06ee5;
-            margin-bottom: 8px;
-        }
-        .upload-btn {
-            background: linear-gradient(90deg, #a06ee5 40%, #7b7ce9 100%);
-            color: #fff;
-            border: none;
-            padding: 14px 0;
-            border-radius: 11px;
-            font-size: 1.09em;
-            width: 89%;
-            margin: 20px auto 0 auto;
-            box-shadow: 0 3px 16px #e6c7fd30;
-            cursor: pointer;
-            transition: box-shadow 0.2s;
-        }
-        .upload-btn:hover {
-            box-shadow: 0 4px 24px #a06ee566;
-            background: linear-gradient(90deg, #7b7ce9 0%, #a06ee5 100%);
-        }
-        .tip-line {
-            color: #b26a00;
-            background: #fff8e1;
-            border-radius: 9px;
-            padding: 12px 0;
-            font-size: 0.99em;
-            margin: 22px 0 0 0;
-        }
-        .uploaded-preview {
-            margin: 16px 0 16px 0;
-        }
-        .uploaded-preview img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin: 0 4px;
-            border: 2px solid #a06ee5;
-            box-shadow: 0 2px 9px #a06ee522;
-        }
-    </style>
-    <script>
-    // Show selected filenames and preview
-    function showPreview(input) {
-        const preview = document.getElementById('preview');
-        preview.innerHTML = '';
-        Array.from(input.files).forEach(file => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    preview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-    </script>
 </head>
 <body>
-    <div class="photo-card">
-        <div class="drop-label">📸</div>
-        <h2 style="margin-bottom: 10px;">Upload Your Best Photo!</h2>
-        <div style="color:#a06ee5;margin-bottom:13px;">
-            Your profile photo is your first impression. Make it shine!
-        </div>
+<main class="container">
+    <div class="card" style="max-width:550px;margin:80px auto;text-align:center">
+        <div style="font-size:4rem;margin-bottom:20px">📸</div>
+        <h2 class="page-title" style="margin-bottom:12px">Upload Your Profile Photo</h2>
+        <p class="lead" style="margin-bottom:32px">Your photo is your first impression. Make it count!</p>
+        
         <?php if ($error): ?>
-            <div style="background:#ffe5e5;color:#ae2222;padding:10px 0;margin-bottom:18px;border-radius:10px;">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
+            <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
         <?php elseif ($success): ?>
-            <div style="background:#e8ffe6;color:#218e2c;padding:10px 0;margin-bottom:18px;border-radius:10px;">
-                <?php echo htmlspecialchars($success); ?>
-            </div>
+            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
         <?php endif; ?>
-        <form method="POST" enctype="multipart/form-data" style="margin-bottom:0;">
-            <div class="drop-zone" onclick="document.getElementById('primary-photo').click();">
-                <div style="font-size:2.3em;">👤</div>
-                <div style="margin-bottom:10px;font-weight:600;">Primary Photo (required)</div>
-                <input type="file" id="primary-photo" name="photo[]" accept=".jpg,.jpeg,.png,.gif" required onchange="showPreview(this)">
-                <div style="color:#7b7ce9;font-size:0.97em;margin-bottom:12px;">Click here to choose your main photo</div>
-                <input type="hidden" name="is_primary" value="1">
-                <div id="preview" class="uploaded-preview"></div>
+        
+        <form method="POST" enctype="multipart/form-data" style="margin-bottom:32px">
+            <div style="border:2px dashed rgba(255,255,255,0.3);border-radius:14px;padding:40px 20px;background:rgba(167,139,250,0.08);margin-bottom:24px;cursor:pointer;transition:var(--transition)" onclick="document.getElementById('photo-input').click()">
+                <div style="font-size:3rem;margin-bottom:16px">👤</div>
+                <div style="font-weight:600;margin-bottom:8px;font-size:1.1rem">Choose Your Best Photo</div>
+                <div style="color:var(--muted);font-size:0.95rem;margin-bottom:16px">Click to select a photo from your device</div>
+                <input type="file" id="photo-input" name="photo" accept="image/*" required style="display:none" onchange="previewPhoto(this)">
+                <div id="preview-container" style="margin-top:20px"></div>
             </div>
-            <div class="drop-zone" onclick="document.getElementById('additional-photo').click();">
-                <div style="font-size:1.6em;">🖼️</div>
-                <div style="margin-bottom:10px;font-weight:600;">Additional Photos (optional)</div>
-                <input type="file" id="additional-photo" name="photo[]" accept=".jpg,.jpeg,.png,.gif" multiple onchange="showPreview(this)">
-                <div style="color:#7b7ce9;font-size:0.97em;margin-bottom:12px;">Click here to add more photos</div>
-            </div>
-            <button type="submit" class="upload-btn">Upload Photos</button>
+            
+            <button type="submit" class="btn" style="width:100%;justify-content:center;padding:16px;font-size:1.1rem">
+                ✨ Upload Photo
+            </button>
         </form>
-        <div class="tip-line">
-            Tip: Profiles with a friendly, clear photo get <b>3x more connections</b>!<br>
-            Smile &amp; let your personality shine. 🌟
+        
+        <div style="background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.3);border-radius:10px;padding:16px;color:rgba(251,191,36,0.95)">
+            <strong>💡 Pro Tip:</strong> Profiles with a clear, friendly photo get 3x more matches!
         </div>
     </div>
+</main>
+
+<script>
+function previewPhoto(input) {
+    const container = document.getElementById('preview-container');
+    container.innerHTML = '';
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.cssText = 'width:150px;height:150px;object-fit:cover;border-radius:50%;border:4px solid rgba(255,255,255,0.3);box-shadow:var(--shadow-md)';
+            container.appendChild(img);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 </body>
 </html>

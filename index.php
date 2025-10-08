@@ -79,72 +79,194 @@ if ($is_logged_in) {
 
 <main class="container">
     <?php if (!$is_logged_in): ?>
-        <section class="card card-hero">
-            <div>
-                <h1 class="page-title">Welcome to <span class="brand"><span class="accent">Meet</span> Beyond</span></h1>
-                <p class="lead">Your platform for authentic connections. Join thousands of people finding meaningful relationships every day.</p>
-                <div class="hero-cta">
-                    <a href="register.php" class="btn-hero">Get Started</a>
-                    <a href="browse.php" class="btn btn-ghost">Browse Profiles</a>
+        <!-- Hero Section -->
+        <section class="card card-hero" style="min-height:450px">
+            <div style="flex:1">
+                <div style="display:inline-block;padding:8px 16px;background:rgba(167,139,250,0.2);border-radius:20px;margin-bottom:20px;font-size:0.9rem;font-weight:600">
+                    ✨ Find Your Perfect Match
+                </div>
+                <h1 class="page-title" style="font-size:3rem;margin-bottom:16px">
+                    Welcome to <span class="brand"><span class="accent">Meet</span> Beyond</span>
+                </h1>
+                <p class="lead" style="font-size:1.2rem;margin-bottom:32px">
+                    Connect with amazing people. Build meaningful relationships. Create lasting memories.
+                </p>
+                <div class="hero-cta" style="gap:16px">
+                    <a href="register.php" class="btn-hero" style="padding:16px 32px;font-size:1.1rem">
+                        Get Started Free
+                    </a>
+                    <a href="browse.php" class="btn-ghost" style="padding:16px 28px">
+                        Browse Profiles
+                    </a>
+                </div>
+                <div style="display:flex;gap:24px;margin-top:40px;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:1.5rem">✓</span>
+                        <span style="color:var(--muted)">Smart Matching</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:1.5rem">✓</span>
+                        <span style="color:var(--muted)">Safe & Secure</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:1.5rem">✓</span>
+                        <span style="color:var(--muted)">Real Events</span>
+                    </div>
                 </div>
             </div>
-            <div style="margin-left:auto;min-width:260px;text-align:right">
-                <div class="muted">Smart Matching · Safe Messaging · Real Events</div>
+            <div style="flex:0 0 300px;display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:280px;height:280px">
+                    <div style="position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-purple),var(--accent-pink));border-radius:50%;opacity:0.2;filter:blur(40px)"></div>
+                    <div style="position:relative;width:100%;height:100%;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8rem;backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,0.1)">
+                        💝
+                    </div>
+                </div>
             </div>
         </section>
-    <?php else: ?>
-        <section class="card">
-            <div class="page-top">
-                <div>
-                    <h2 class="page-title">Hi, <?php echo htmlspecialchars($user_name); ?>!</h2>
-                    <p class="lead">Here’s your Meet Beyond dashboard. Ready to connect?</p>
-                </div>
-                <div class="muted">Welcome back</div>
-            </div>
 
-            <div class="dashboard-header-row">
-                <div class="dashboard-tiles-inline">
-                    <a class="tile-big dashboard-link accent-purple" href="profile_view.php">
-                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-profile"></use></svg></span>
-                        <div>
-                            <div class="label">Profile</div>
-                            <div class="sub">View your profile</div>
-                        </div>
-                    </a>
-                    <a class="tile-big dashboard-link accent-teal" href="events.php">
-                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-events"></use></svg></span>
-                        <div>
-                            <div class="label">Events</div>
-                            <div class="sub">Nearby gatherings</div>
-                        </div>
-                    </a>
-                    <a class="tile-big dashboard-link accent-rose" href="browse.php">
-                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-browse"></use></svg></span>
-                        <div>
-                            <div class="label">Browse</div>
-                            <div class="sub">Explore profiles</div>
-                        </div>
-                    </a>
-                    <a class="tile-big dashboard-link accent-rose" href="matches.php">
-                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-heart"></use></svg></span>
-                        <div>
-                            <div class="label">Matches</div>
-                            <div class="sub">See your top matches</div>
-                        </div>
-                    </a>
-                    <a class="tile-big dashboard-link accent-purple" href="messages.php">
-                        <span class="icon-badge" aria-hidden="true"><svg><use xlink:href="assets/icons.svg#icon-messages"></use></svg></span>
-                        <div>
-                            <div class="label">Messages</div>
-                            <div class="sub">Inbox & chats</div>
-                        </div>
-                    </a>
+        <!-- Features Section -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:40px">
+            <div class="card" style="text-align:center">
+                <div style="font-size:3rem;margin-bottom:16px">🎯</div>
+                <h3 style="font-size:1.3rem;margin-bottom:12px;font-weight:700">Smart Matching</h3>
+                <p style="color:var(--muted);line-height:1.6">
+                    Our advanced algorithm finds people who share your interests and values
+                </p>
+            </div>
+            <div class="card" style="text-align:center">
+                <div style="font-size:3rem;margin-bottom:16px">💬</div>
+                <h3 style="font-size:1.3rem;margin-bottom:12px;font-weight:700">Real Conversations</h3>
+                <p style="color:var(--muted);line-height:1.6">
+                    Connect through meaningful messages and genuine interactions
+                </p>
+            </div>
+            <div class="card" style="text-align:center">
+                <div style="font-size:3rem;margin-bottom:16px">🎉</div>
+                <h3 style="font-size:1.3rem;margin-bottom:12px;font-weight:700">Local Events</h3>
+                <p style="color:var(--muted);line-height:1.6">
+                    Meet in person at fun, safe events happening in your area
+                </p>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="card" style="margin-top:40px;text-align:center;background:linear-gradient(135deg,rgba(167,139,250,0.15),rgba(244,114,182,0.15))">
+            <h2 style="font-size:2rem;margin-bottom:32px;font-weight:700">Join Thousands of Happy Members</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px">
+                <div>
+                    <div style="font-size:2.5rem;font-weight:800;color:var(--accent-purple);margin-bottom:8px">10K+</div>
+                    <div style="color:var(--muted);font-size:1.05rem">Active Users</div>
                 </div>
-                <div class="dashboard-tile-grid">
-                    <!-- additional tiles or quick actions could go here -->
+                <div>
+                    <div style="font-size:2.5rem;font-weight:800;color:var(--accent-pink);margin-bottom:8px">5K+</div>
+                    <div style="color:var(--muted);font-size:1.05rem">Successful Matches</div>
+                </div>
+                <div>
+                    <div style="font-size:2.5rem;font-weight:800;color:var(--accent-blue);margin-bottom:8px">100+</div>
+                    <div style="color:var(--muted);font-size:1.05rem">Events Monthly</div>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="card" style="margin-top:40px;text-align:center;background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(244,114,182,0.2))">
+            <h2 style="font-size:2.2rem;margin-bottom:16px;font-weight:700">Ready to Find Your Match?</h2>
+            <p style="font-size:1.1rem;color:var(--muted);margin-bottom:32px">
+                Join for free and start connecting with amazing people today
+            </p>
+            <a href="register.php" class="btn-hero" style="padding:18px 40px;font-size:1.15rem">
+                Create Your Profile Now →
+            </a>
+        </div>
+        <?php else: ?>
+        <!-- Professional Dashboard Header -->
+        <div style="margin-bottom:32px">
+            <h1 style="font-size:2rem;font-weight:600;margin-bottom:8px;color:var(--text)">
+                Welcome back, <?php echo htmlspecialchars($user_name); ?>
+            </h1>
+            <p style="color:var(--muted);font-size:1rem">
+                Manage your connections and discover new opportunities
+            </p>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-bottom:24px">
+            <!-- Discover Card -->
+            <a href="discover.php" class="card" style="display:flex;align-items:center;gap:20px;padding:24px;text-decoration:none;transition:all 0.3s ease;border:2px solid rgba(236,72,153,0.2)" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(236,72,153,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.borderColor='rgba(236,72,153,0.2)'">
+                <div style="flex-shrink:0;width:56px;height:56px;background:linear-gradient(135deg,rgba(236,72,153,0.2),rgba(219,39,119,0.3));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px">
+                    💖
+                </div>
+                <div style="flex:1">
+                    <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:6px;color:var(--text)">Discover</h3>
+                    <p style="color:var(--muted);font-size:0.95rem;margin:0">Find and match with new people</p>
+                </div>
+            </a>
+
+            <!-- Matches Card -->
+            <a href="matches.php" class="card" style="display:flex;align-items:center;gap:20px;padding:24px;text-decoration:none;transition:all 0.3s ease;border:2px solid rgba(167,139,250,0.2)" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(167,139,250,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.borderColor='rgba(167,139,250,0.2)'">
+                <div style="flex-shrink:0;width:56px;height:56px;background:linear-gradient(135deg,rgba(167,139,250,0.2),rgba(139,92,246,0.3));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px">
+                    ❤️
+                </div>
+                <div style="flex:1">
+                    <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:6px;color:var(--text)">Matches</h3>
+                    <p style="color:var(--muted);font-size:0.95rem;margin:0">View your mutual connections</p>
+                </div>
+            </a>
+
+            <!-- Messages Card -->
+            <a href="messages.php" class="card" style="display:flex;align-items:center;gap:20px;padding:24px;text-decoration:none;transition:all 0.3s ease;border:2px solid rgba(59,130,246,0.2)" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(59,130,246,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.borderColor='rgba(59,130,246,0.2)'">
+                <div style="flex-shrink:0;width:56px;height:56px;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(37,99,235,0.3));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px">
+                    💬
+                </div>
+                <div style="flex:1">
+                    <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:6px;color:var(--text)">Messages</h3>
+                    <p style="color:var(--muted);font-size:0.95rem;margin:0">Chat with your connections</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Secondary Options -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+            <a href="browse.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="flex-shrink:0;width:44px;height:44px;background:rgba(167,139,250,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">
+                    👥
+                </div>
+                <div>
+                    <h4 style="font-size:1.05rem;font-weight:600;margin-bottom:4px;color:var(--text)">Browse</h4>
+                    <p style="color:var(--muted);font-size:0.875rem;margin:0">Explore all profiles</p>
+                </div>
+            </a>
+
+            <a href="events.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="flex-shrink:0;width:44px;height:44px;background:rgba(52,211,153,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">
+                    📅
+                </div>
+                <div>
+                    <h4 style="font-size:1.05rem;font-weight:600;margin-bottom:4px;color:var(--text)">Events</h4>
+                    <p style="color:var(--muted);font-size:0.875rem;margin:0">Nearby gatherings</p>
+                </div>
+            </a>
+
+            <a href="profile_view.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="flex-shrink:0;width:44px;height:44px;background:rgba(139,92,246,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">
+                    👤
+                </div>
+                <div>
+                    <h4 style="font-size:1.05rem;font-weight:600;margin-bottom:4px;color:var(--text)">Profile</h4>
+                    <p style="color:var(--muted);font-size:0.875rem;margin:0">View & edit your profile</p>
+                </div>
+            </a>
+
+            <a href="preferences.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="flex-shrink:0;width:44px;height:44px;background:rgba(251,146,60,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">
+                    ⚙️
+                </div>
+                <div>
+                    <h4 style="font-size:1.05rem;font-weight:600;margin-bottom:4px;color:var(--text)">Preferences</h4>
+                    <p style="color:var(--muted);font-size:0.875rem;margin:0">Update match settings</p>
+                </div>
+            </a>
+        </div>
     <?php endif; ?>
 </main>
 

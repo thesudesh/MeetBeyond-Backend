@@ -45,9 +45,10 @@ if ($is_logged_in) {
     <a class="brand" href="index.php">Meet <span class="accent">Beyond</span></a>
     <nav class="nav">
         <?php if ($is_logged_in): ?>
+            <a href="discover.php">💖 Discover</a>
             <a href="browse.php">Browse</a>
             <a href="messages.php">Messages</a>
-            <a href="profile.php">Profile</a>
+            <a href="profile_view.php">Profile</a>
             <a href="logout.php" class="btn-ghost">Logout</a>
         <?php else: ?>
             <a href="register.php" class="btn">Get Started</a>

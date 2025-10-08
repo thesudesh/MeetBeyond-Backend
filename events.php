@@ -74,29 +74,61 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'])) {
         <p class="lead">Join virtual or in-person events to connect with others!</p>
 
         <?php if (empty($events)): ?>
-            <div class="text-center" style="padding:36px 0;color:var(--muted);">No events available at the moment.</div>
+            <div class="text-center" style="padding:60px 20px;color:var(--muted)">
+                <div style="font-size:3rem;margin-bottom:16px">🎉</div>
+                <h3 style="font-size:1.3rem;margin-bottom:8px;color:var(--text)">No events available</h3>
+                <p>Check back soon for exciting events!</p>
+            </div>
         <?php else: ?>
-            <div class="grid">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-top:24px">
                 <?php foreach ($events as $event): ?>
-                <div class="card">
-                    <div style="font-size:1.9rem;margin-bottom:6px;"><?php echo $event['type'] === 'virtual' ? '💻' : '📍'; ?></div>
-                    <div style="font-weight:800;margin-bottom:6px;"><?php echo htmlspecialchars($event['title']); ?></div>
-                    <div style="font-size:0.98rem;color:var(--muted);margin-bottom:10px;"><?php echo htmlspecialchars($event['desc']); ?></div>
-                    <div style="color:var(--accent);font-size:0.97rem;margin-bottom:6px;">
-                        <?php echo date('M d, Y H:i', strtotime($event['dt'])); ?><?php if ($event['loc']) echo ' | ' . htmlspecialchars($event['loc']); ?>
+                <article style="background:var(--panel-bg);border-radius:14px;padding:28px;border:1px solid rgba(255,255,255,0.08);transition:var(--transition);display:flex;flex-direction:column">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+                        <div style="font-size:2.5rem;"><?php echo $event['type'] === 'virtual' ? '💻' : '📍'; ?></div>
+                        <div style="flex:1">
+                            <span class="badge <?php echo $event['type'] === 'virtual' ? 'badge-primary' : 'badge-pink'; ?>" style="font-size:0.8rem">
+                                <?php echo ucfirst($event['type']); ?>
+                            </span>
+                        </div>
+                        <?php if ($event['my_status']): ?>
+                            <span class="badge badge-success" style="font-size:0.8rem">✓ Registered</span>
+                        <?php endif; ?>
                     </div>
-                    <div style="color:var(--muted);font-size:0.95rem;margin-bottom:8px;">
-                        <?php echo ucfirst($event['type']); ?> · <?php echo (int)$event['count']; ?> participant<?php echo $event['count'] == 1 ? '' : 's'; ?>
+                    
+                    <h3 style="font-weight:700;font-size:1.25rem;margin-bottom:12px;color:var(--text)">
+                        <?php echo htmlspecialchars($event['title']); ?>
+                    </h3>
+                    
+                    <p style="font-size:0.95rem;color:rgba(239,233,255,0.75);margin-bottom:16px;line-height:1.6;flex:1">
+                        <?php echo htmlspecialchars($event['desc']); ?>
+                    </p>
+                    
+                    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;padding:14px;background:rgba(0,0,0,0.2);border-radius:10px">
+                        <div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:0.9rem">
+                            <span style="font-size:1.2rem">📅</span>
+                            <span><?php echo date('M d, Y \a\t g:i A', strtotime($event['dt'])); ?></span>
+                        </div>
+                        <?php if ($event['loc']): ?>
+                        <div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:0.9rem">
+                            <span style="font-size:1.2rem">📍</span>
+                            <span><?php echo htmlspecialchars($event['loc']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:0.9rem">
+                            <span style="font-size:1.2rem">👥</span>
+                            <span><?php echo (int)$event['count']; ?> participant<?php echo $event['count'] == 1 ? '' : 's'; ?> attending</span>
+                        </div>
                     </div>
+                    
                     <form method="POST">
                         <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
                         <?php if ($event['my_status']): ?>
-                            <button type="submit" name="action" value="cancel" class="btn btn-ghost">Cancel Registration</button>
+                            <button type="submit" name="action" value="cancel" class="btn-ghost" style="width:100%;justify-content:center">Cancel Registration</button>
                         <?php else: ?>
-                            <button type="submit" name="action" value="join" class="btn">Join Event</button>
+                            <button type="submit" name="action" value="join" class="btn" style="width:100%;justify-content:center">Join Event</button>
                         <?php endif; ?>
                     </form>
-                </div>
+                </article>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

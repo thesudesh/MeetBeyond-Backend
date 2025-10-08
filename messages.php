@@ -151,12 +151,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
                 <?php endif; ?>
             </section>
         </div>
-
-        <div style="margin-top:20px">
-            <a href="index.php" class="btn-ghost">← Back to Dashboard</a>
-        </div>
     </section>
 </main>
+
+<a href="index.php" class="back-btn" title="Back to Dashboard">←</a>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
 </body>

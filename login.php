@@ -45,22 +45,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <?php include_once __DIR__ . '/includes/nav.php'; ?>
 
 <main class="container">
-    <div class="card" style="max-width:480px;margin:0 auto">
-        <h2 class="page-title">Sign In</h2>
-        <p class="lead">Welcome back! Please sign in to continue.</p>
+    <div class="card" style="max-width:500px;margin:60px auto;text-align:center">
+        <div style="font-size:3.5rem;margin-bottom:20px">👋</div>
+        <h2 class="page-title" style="margin-bottom:12px">Welcome Back!</h2>
+        <p class="lead" style="margin-bottom:32px">Sign in to continue your journey</p>
 
         <?php if ($error): ?>
-            <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+            <div class="alert alert-error" style="text-align:left"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
 
-        <form method="POST" autocomplete="off" class="form-row" style="margin-top:6px">
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" class="btn-hero">Sign In</button>
+        <form method="POST" autocomplete="off" style="text-align:left">
+            <div class="form-row">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+                    <span style="font-size:1.2rem">📧</span> Email Address
+                </label>
+                <input type="email" name="email" placeholder="your@email.com" required>
+            </div>
+
+            <div class="form-row">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+                    <span style="font-size:1.2rem">🔒</span> Password
+                </label>
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn" style="width:100%;justify-content:center;padding:16px;margin-top:24px;font-size:1.05rem">
+                Sign In →
+            </button>
         </form>
 
-        <p class="form-note">Don't have an account? <a href="register.php" class="btn-ghost">Register</a></p>
-    <p class="form-note"><a href="index.php" class="btn-ghost"><svg aria-hidden="true" style="width:16px;height:16px;vertical-align:middle"><use xlink:href="assets/icons.svg#icon-back"></use></svg> Back to Home</a></p>
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1)">
+            <p style="color:var(--muted);margin-bottom:16px">Don't have an account?</p>
+            <a href="register.php" class="btn-ghost" style="display:inline-flex">Create Account</a>
+        </div>
+
+        <div style="margin-top:20px">
+            <a href="index.php" style="color:var(--muted);font-size:0.95rem">← Back to Home</a>
+        </div>
     </div>
 </main>
 </body>
