@@ -37,6 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $conn->begin_transaction();
             
+            // Initialize exclusive photo tracking
+            $available_male_photos = range(1, 25);    // [1, 2, 3, ..., 25]
+            $available_female_photos = range(1, 25);  // [1, 2, 3, ..., 25]
+            shuffle($available_male_photos);          // Randomize order
+            shuffle($available_female_photos);        // Randomize order
+            
             $created = 0;
             for ($i = 1; $i <= $count; $i++) {
                 // Generate unique email
@@ -101,52 +107,104 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute();
                     $stmt->close();
                     
-                    // Add profile photo
+                    // Add profile photo with exclusive assignment
                     $photo_added = false;
                     if ($gender === 'male') {
-                        $photo_num = rand(1, 25);
-                        $source_path = __DIR__ . "/images/men/m$photo_num.jpg";
-                        if (file_exists($source_path)) {
-                            // Create unique filename
-                            $unique_filename = "user_" . $new_user_id . "_" . time() . "_" . $i . "_m$photo_num.jpg";
-                            $dest_path = __DIR__ . "/MBusers/photos/" . $unique_filename;
-                            
-                            // Ensure directory exists
-                            $photo_dir = dirname($dest_path);
-                            if (!is_dir($photo_dir)) {
-                                mkdir($photo_dir, 0755, true);
+                        // Use exclusive male photo assignment
+                        if (!empty($available_male_photos)) {
+                            $photo_num = array_pop($available_male_photos); // Take one photo from available list
+                            $source_path = __DIR__ . "/images/men/m$photo_num.jpg";
+                            if (file_exists($source_path)) {
+                                // Create unique filename
+                                $unique_filename = "user_" . $new_user_id . "_" . time() . "_" . $i . "_m$photo_num.jpg";
+                                $dest_path = __DIR__ . "/MBusers/photos/" . $unique_filename;
+                                
+                                // Ensure directory exists
+                                $photo_dir = dirname($dest_path);
+                                if (!is_dir($photo_dir)) {
+                                    mkdir($photo_dir, 0755, true);
+                                }
+                                
+                                // Copy the image
+                                if (copy($source_path, $dest_path)) {
+                                    $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary, is_active, uploaded_at) VALUES (?, ?, 1, 1, NOW())");
+                                    $stmt->bind_param("is", $new_user_id, $unique_filename);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    $photo_added = true;
+                                }
                             }
-                            
-                            // Copy the image
-                            if (copy($source_path, $dest_path)) {
-                                $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary, is_active, uploaded_at) VALUES (?, ?, 1, 1, NOW())");
-                                $stmt->bind_param("is", $new_user_id, $unique_filename);
-                                $stmt->execute();
-                                $stmt->close();
-                                $photo_added = true;
+                        } else {
+                            // If all 25 male photos used, reset the list for overflow users
+                            $available_male_photos = range(1, 25);
+                            shuffle($available_male_photos);
+                            $photo_num = array_pop($available_male_photos);
+                            $source_path = __DIR__ . "/images/men/m$photo_num.jpg";
+                            if (file_exists($source_path)) {
+                                $unique_filename = "user_" . $new_user_id . "_" . time() . "_" . $i . "_m$photo_num.jpg";
+                                $dest_path = __DIR__ . "/MBusers/photos/" . $unique_filename;
+                                
+                                $photo_dir = dirname($dest_path);
+                                if (!is_dir($photo_dir)) {
+                                    mkdir($photo_dir, 0755, true);
+                                }
+                                
+                                if (copy($source_path, $dest_path)) {
+                                    $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary, is_active, uploaded_at) VALUES (?, ?, 1, 1, NOW())");
+                                    $stmt->bind_param("is", $new_user_id, $unique_filename);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    $photo_added = true;
+                                }
                             }
                         }
                     } else { // female
-                        $photo_num = rand(1, 25);
-                        $source_path = __DIR__ . "/images/women/f$photo_num.jpg";
-                        if (file_exists($source_path)) {
-                            // Create unique filename
-                            $unique_filename = "user_" . $new_user_id . "_" . time() . "_" . $i . "_f$photo_num.jpg";
-                            $dest_path = __DIR__ . "/MBusers/photos/" . $unique_filename;
-                            
-                            // Ensure directory exists
-                            $photo_dir = dirname($dest_path);
-                            if (!is_dir($photo_dir)) {
-                                mkdir($photo_dir, 0755, true);
+                        // Use exclusive female photo assignment
+                        if (!empty($available_female_photos)) {
+                            $photo_num = array_pop($available_female_photos); // Take one photo from available list
+                            $source_path = __DIR__ . "/images/women/f$photo_num.jpg";
+                            if (file_exists($source_path)) {
+                                // Create unique filename
+                                $unique_filename = "user_" . $new_user_id . "_" . time() . "_" . $i . "_f$photo_num.jpg";
+                                $dest_path = __DIR__ . "/MBusers/photos/" . $unique_filename;
+                                
+                                // Ensure directory exists
+                                $photo_dir = dirname($dest_path);
+                                if (!is_dir($photo_dir)) {
+                                    mkdir($photo_dir, 0755, true);
+                                }
+                                
+                                // Copy the image
+                                if (copy($source_path, $dest_path)) {
+                                    $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary, is_active, uploaded_at) VALUES (?, ?, 1, 1, NOW())");
+                                    $stmt->bind_param("is", $new_user_id, $unique_filename);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    $photo_added = true;
+                                }
                             }
-                            
-                            // Copy the image
-                            if (copy($source_path, $dest_path)) {
-                                $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary, is_active, uploaded_at) VALUES (?, ?, 1, 1, NOW())");
-                                $stmt->bind_param("is", $new_user_id, $unique_filename);
-                                $stmt->execute();
-                                $stmt->close();
-                                $photo_added = true;
+                        } else {
+                            // If all 25 female photos used, reset the list for overflow users
+                            $available_female_photos = range(1, 25);
+                            shuffle($available_female_photos);
+                            $photo_num = array_pop($available_female_photos);
+                            $source_path = __DIR__ . "/images/women/f$photo_num.jpg";
+                            if (file_exists($source_path)) {
+                                $unique_filename = "user_" . $new_user_id . "_" . time() . "_" . $i . "_f$photo_num.jpg";
+                                $dest_path = __DIR__ . "/MBusers/photos/" . $unique_filename;
+                                
+                                $photo_dir = dirname($dest_path);
+                                if (!is_dir($photo_dir)) {
+                                    mkdir($photo_dir, 0755, true);
+                                }
+                                
+                                if (copy($source_path, $dest_path)) {
+                                    $stmt = $conn->prepare("INSERT INTO Photos (user_id, file_path, is_primary, is_active, uploaded_at) VALUES (?, ?, 1, 1, NOW())");
+                                    $stmt->bind_param("is", $new_user_id, $unique_filename);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    $photo_added = true;
+                                }
                             }
                         }
                     }

@@ -30,7 +30,7 @@ $stmt->bind_result($min_age, $max_age, $gender_pref, $location);
 $stmt->fetch();
 $stmt->close();
 
-// Fetch random users (exclude current user, admins, users without complete profiles, and filter by gender preference)
+// Fetch random users (exclude current user, admins, users without complete profiles, prioritize by preferences)
 $sql = "
     SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path
     FROM Users u
@@ -40,38 +40,26 @@ $sql = "
     AND u.role != 'admin'
     AND p.name IS NOT NULL 
     AND p.age IS NOT NULL
-";
-
-// Add gender preference filter if set
-if (!empty($gender_pref) && $gender_pref !== 'both' && $gender_pref !== 'any') {
-    $sql .= " AND p.gender = ?";
-    $use_gender_filter = true;
-} else {
-    $use_gender_filter = false;
-}
-
-// Add age preference filter if set
-if (!empty($min_age) && !empty($max_age)) {
-    $sql .= " AND p.age BETWEEN ? AND ?";
-    $use_age_filter = true;
-} else {
-    $use_age_filter = false;
-}
-
-$sql .= " ORDER BY RAND() LIMIT 12";
+    ORDER BY 
+        CASE 
+            WHEN (? IS NULL OR ? = 'both' OR ? = 'any' OR p.gender = ?) THEN 1 
+            ELSE 0.3 
+        END *
+        CASE 
+            WHEN (? IS NULL OR ? IS NULL OR p.age BETWEEN ? AND ?) THEN 1 
+            ELSE 0.5 
+        END * RAND() DESC, 
+        RAND() 
+    LIMIT 12";
 
 $stmt = $conn->prepare($sql);
 
-// Bind parameters based on what filters are active
-if ($use_gender_filter && $use_age_filter) {
-    $stmt->bind_param("isii", $user_id, $gender_pref, $min_age, $max_age);
-} elseif ($use_gender_filter) {
-    $stmt->bind_param("is", $user_id, $gender_pref);
-} elseif ($use_age_filter) {
-    $stmt->bind_param("iii", $user_id, $min_age, $max_age);
-} else {
-    $stmt->bind_param("i", $user_id);
-}
+// Bind parameters for prioritization (user_id, gender prefs, age prefs)
+$stmt->bind_param("issssiiii", 
+    $user_id,                                               // exclude current user
+    $gender_pref, $gender_pref, $gender_pref, $gender_pref, // gender priority params
+    $min_age, $max_age, $min_age, $max_age                  // age priority params  
+);
 $stmt->execute();
 $stmt->bind_result($other_id, $other_name, $other_age, $other_gender, $other_bio, $photo_path);
 
@@ -260,14 +248,14 @@ $photo_base = "MBusers/photos/";
         <?php if (!empty($gender_pref) || (!empty($min_age) && !empty($max_age))): ?>
             <div style="margin-top: 16px; padding: 12px 20px; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); border-radius: 12px; display: inline-block;">
                 <span style="color: var(--accent-purple); font-weight: 600; font-size: 0.9rem;">
-                    🎯 Filtered by your preferences: 
+                    🎯 Prioritized by your preferences: 
                     <?php if (!empty($gender_pref) && $gender_pref !== 'both' && $gender_pref !== 'any'): ?>
-                        <?php echo ucfirst($gender_pref); ?> profiles
+                        <?php echo ucfirst($gender_pref); ?> profiles first
                     <?php else: ?>
                         All genders
                     <?php endif; ?>
                     <?php if (!empty($min_age) && !empty($max_age)): ?>
-                        , Ages <?php echo $min_age; ?>-<?php echo $max_age; ?>
+                        , Ages <?php echo $min_age; ?>-<?php echo $max_age; ?> first
                     <?php endif; ?>
                 </span>
                 <a href="preferences.php" style="color: var(--accent-purple); text-decoration: none; margin-left: 8px; font-size: 0.85rem;">
@@ -279,16 +267,8 @@ $photo_base = "MBusers/photos/";
 
     <?php if (empty($users)): ?>
         <div class="empty-state">
-            <?php if (!empty($gender_pref) && $gender_pref !== 'both' && $gender_pref !== 'any'): ?>
-                <h3>No <?php echo strtolower($gender_pref); ?> profiles found</h3>
-                <p>No profiles match your current preferences. Try adjusting your filters or check back later!</p>
-                <a href="preferences.php" class="btn" style="margin-top: 16px; text-decoration: none;">
-                    ⚙️ Update Preferences
-                </a>
-            <?php else: ?>
-                <h3>No profiles available</h3>
-                <p>Check back soon for new profiles to discover!</p>
-            <?php endif; ?>
+            <h3>No profiles available</h3>
+            <p>Check back soon for new profiles to discover!</p>
         </div>
     <?php else: ?>
         <div class="browse-grid">

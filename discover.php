@@ -54,12 +54,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
             $message = "🎉 It's a Match!";
         }
+        
+        // Clear the current discover profile from session after action
+        unset($_SESSION['current_discover_profile']);
     } elseif ($action === 'pass' && $target_id > 0) {
         // Insert pass (so we don't show them again)
         $stmt = $conn->prepare("INSERT INTO Likes (liker_id, liked_id, status) VALUES (?, ?, 'passed') ON DUPLICATE KEY UPDATE status='passed', created_at=NOW()");
         $stmt->bind_param("ii", $user_id, $target_id);
         $stmt->execute();
         $stmt->close();
+        
+        // Clear the current discover profile from session after action
+        unset($_SESSION['current_discover_profile']);
     } elseif ($action === 'block' && $target_id > 0) {
         // Block user
         $stmt = $conn->prepare("INSERT IGNORE INTO Blocks (blocker_id, blocked_id) VALUES (?, ?)");
@@ -72,6 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("ii", $user_id, $target_id);
         $stmt->execute();
         $stmt->close();
+        
+        // Clear the current discover profile from session after action
+        unset($_SESSION['current_discover_profile']);
     }
 }
 
@@ -98,58 +107,119 @@ $stmt->close();
 
 $is_premium = !empty($current_plan);
 
-// Fetch next profile to show with premium user prioritization
-$sql = "
-    SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path,
-           s.plan_type,
-           CASE 
-               WHEN s.plan_type = 'boost_10x' THEN RAND() * 10
-               WHEN s.plan_type = 'boost_5x' THEN RAND() * 5  
-               WHEN s.plan_type = 'boost_2x' THEN RAND() * 2
-               ELSE RAND()
-           END as priority_score
-    FROM Users u
-    JOIN Profiles p ON u.id = p.user_id
-    JOIN Photos ph ON ph.user_id = u.id AND ph.is_primary=1 AND ph.is_active=1
-    LEFT JOIN Subscriptions s ON u.id = s.user_id AND s.end_date > CURDATE()
-    WHERE u.id != ?
-    AND u.role != 'admin'
-    AND p.name IS NOT NULL 
-    AND p.age IS NOT NULL
-    AND p.visible = TRUE
-    AND u.id NOT IN (
-        SELECT liked_id FROM Likes WHERE liker_id = ?
-    )
-    AND u.id NOT IN (
-        SELECT blocked_id FROM Blocks WHERE blocker_id = ?
-    )
-";
+// Check if we have a current profile in session (for persistence)
+$profile_data = null;
+$has_profile = false;
 
-// Add preference filters if set
-$params = [$user_id, $user_id, $user_id];
-$types = "iii";
+if (isset($_SESSION['current_discover_profile'])) {
+    $stored_profile_id = $_SESSION['current_discover_profile'];
+    
+    // Verify this profile is still valid (not liked/passed/blocked/matched)
+    $stmt = $conn->prepare("
+        SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path, s.plan_type
+        FROM Users u
+        JOIN Profiles p ON u.id = p.user_id
+        JOIN Photos ph ON ph.user_id = u.id AND ph.is_primary=1 AND ph.is_active=1
+        LEFT JOIN Subscriptions s ON u.id = s.user_id AND s.end_date > CURDATE()
+        WHERE u.id = ?
+        AND u.id != ?
+        AND u.role != 'admin'
+        AND p.name IS NOT NULL 
+        AND p.age IS NOT NULL
+        AND p.visible = TRUE
+        AND u.id NOT IN (
+            SELECT liked_id FROM Likes WHERE liker_id = ?
+        )
+        AND u.id NOT IN (
+            SELECT blocked_id FROM Blocks WHERE blocker_id = ?
+        )
+        AND u.id NOT IN (
+            SELECT CASE 
+                WHEN user1_id = ? THEN user2_id 
+                WHEN user2_id = ? THEN user1_id 
+            END 
+            FROM Matches 
+            WHERE user1_id = ? OR user2_id = ?
+        )
+    ");
+    $stmt->bind_param("iiiiiiii", $stored_profile_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $profile_data = $result->fetch_assoc();
+    $stmt->close();
+}
 
-if ($min_age && $max_age) {
-    $sql .= " AND p.age BETWEEN ? AND ?";
+// If no valid stored profile, fetch a new one
+if (!$profile_data) {
+    // Fetch next profile to show with premium user prioritization and age preference prioritization
+    $sql = "
+        SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path, s.plan_type
+        FROM Users u
+        JOIN Profiles p ON u.id = p.user_id
+        JOIN Photos ph ON ph.user_id = u.id AND ph.is_primary=1 AND ph.is_active=1
+        LEFT JOIN Subscriptions s ON u.id = s.user_id AND s.end_date > CURDATE()
+        WHERE u.id != ?
+        AND u.role != 'admin'
+        AND p.name IS NOT NULL 
+        AND p.age IS NOT NULL
+        AND p.visible = TRUE
+        AND u.id NOT IN (
+            SELECT liked_id FROM Likes WHERE liker_id = ?
+        )
+        AND u.id NOT IN (
+            SELECT blocked_id FROM Blocks WHERE blocker_id = ?
+        )
+        AND u.id NOT IN (
+            SELECT CASE 
+                WHEN user1_id = ? THEN user2_id 
+                WHEN user2_id = ? THEN user1_id 
+            END 
+            FROM Matches 
+            WHERE user1_id = ? OR user2_id = ?
+        )";
+
+    // Add strict gender filter only if preference is set and not 'any' or 'both'
+    $params = [$user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id];
+    $types = "iiiiiii";
+
+    if ($gender_pref && $gender_pref !== 'any' && $gender_pref !== 'both') {
+        $sql .= " AND p.gender = ?";
+        $params[] = $gender_pref;
+        $types .= "s";
+    }
+
+    $sql .= " ORDER BY 
+        CASE 
+            WHEN s.plan_type = 'boost_10x' THEN RAND() * 10
+            WHEN s.plan_type = 'boost_5x' THEN RAND() * 5  
+            WHEN s.plan_type = 'boost_2x' THEN RAND() * 2
+            ELSE RAND()
+        END *
+        CASE 
+            WHEN (? IS NULL OR ? IS NULL OR p.age BETWEEN ? AND ?) THEN 1 
+            ELSE 0.3 
+        END DESC, 
+        RAND() 
+        LIMIT 1";
+
+    $params[] = $min_age;
+    $params[] = $max_age; 
     $params[] = $min_age;
     $params[] = $max_age;
-    $types .= "ii";
+    $types .= "iiii";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $profile_data = $result->fetch_assoc();
+    $stmt->close();
+    
+    // Store the new profile in session for persistence
+    if ($profile_data) {
+        $_SESSION['current_discover_profile'] = $profile_data['id'];
+    }
 }
-
-if ($gender_pref && $gender_pref !== 'any') {
-    $sql .= " AND p.gender = ?";
-    $params[] = $gender_pref;
-    $types .= "s";
-}
-
-$sql .= " ORDER BY priority_score DESC, RAND() LIMIT 1";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
-$stmt->execute();
-$result = $stmt->get_result();
-$profile_data = $result->fetch_assoc();
-$stmt->close();
 
 // Extract variables for backward compatibility
 $has_profile = !empty($profile_data);
@@ -694,11 +764,21 @@ $photo_base = "MBusers/photos/";
         <div class="discover-container">
             <div class="empty-state">
                 <div class="empty-icon">🎯</div>
-                <h2 class="empty-title">No More Profiles</h2>
+                <h2 class="empty-title">No New Profiles</h2>
                 <p class="empty-text">
-                    You've seen all available profiles. Check back later for new members!
+                    You've discovered all available profiles! 
+                    <?php if (!empty($gender_pref) && $gender_pref !== 'any' && $gender_pref !== 'both'): ?>
+                        <br>Currently showing: <?php echo ucfirst($gender_pref); ?> profiles only
+                    <?php endif; ?>
+                    <?php if (!empty($min_age) && !empty($max_age)): ?>
+                        <br>Age preferences: <?php echo $min_age; ?>-<?php echo $max_age; ?> years (prioritized)
+                    <?php endif; ?>
+                    <br><br>Check back later for new members or update your preferences to see more profiles!
                 </p>
-                <a href="index.php" class="btn" style="padding:16px 32px">Back to Dashboard</a>
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
+                    <a href="preferences.php" class="btn" style="padding:16px 32px">Update Preferences</a>
+                    <a href="index.php" class="btn-ghost" style="padding:16px 32px">Back to Dashboard</a>
+                </div>
             </div>
         </div>
     <?php endif; ?>
