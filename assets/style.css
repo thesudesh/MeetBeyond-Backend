@@ -92,6 +92,38 @@ nav {
 .nav a{color:rgba(255,255,255,0.92);text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:600}
 .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
 
+/* Premium navigation link */
+.premium-link {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #1f2937 !important;
+  font-weight: 700 !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(251,191,36,0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #ffffff, #fbbf24);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.premium-link:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(251,191,36,0.4) !important;
+  background: linear-gradient(135deg, #ffffff, #fbbf24) !important;
+}
+
+.premium-link:hover::before {
+  opacity: 0.2;
+}
+
 /* Cards & Containers - Glassmorphism Design */
 .card{
   background:var(--card-bg);

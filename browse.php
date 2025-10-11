@@ -69,6 +69,7 @@ $photo_base = "MBusers/photos/";
     <meta charset="UTF-8">
     <title>Browse | Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
@@ -96,15 +97,9 @@ $photo_base = "MBusers/photos/";
                             <div class="profile-meta"><?php echo htmlspecialchars($u['age']); ?> • <?php echo ucfirst(htmlspecialchars($u['gender'])); ?></div>
                             <div class="profile-bio"><?php $bio = trim($u['bio']); echo $bio ? htmlspecialchars(mb_strimwidth($bio, 0, 140, "...")) : '<span class="muted">No bio yet</span>'; ?></div>
                             <div class="profile-actions">
-                                <button class="icon-btn" title="Pass" aria-label="Pass" onclick="alert('Pass feature coming soon!');">
-                                    <svg aria-hidden="true"><use xlink:href="assets/icons.svg#icon-cross"></use></svg>
-                                </button>
                                 <a class="icon-btn view" title="View Profile" aria-label="View Profile" href="profile_view.php?id=<?php echo $u['id']; ?>">
                                     <svg aria-hidden="true"><use xlink:href="assets/icons.svg#icon-view"></use></svg>
                                 </a>
-                                <button class="icon-btn like" title="Like" aria-label="Like" onclick="alert('Like feature coming soon!');">
-                                    <svg aria-hidden="true"><use xlink:href="assets/icons.svg#icon-heart"></use></svg>
-                                </button>
                             </div>
                         </div>
                     </article>

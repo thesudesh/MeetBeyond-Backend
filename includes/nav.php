@@ -56,6 +56,19 @@ if ($is_logged_in) {
                 <a href="discover.php">💖 Discover</a>
                 <a href="browse.php">Browse</a>
                 <a href="messages.php">Messages</a>
+                <?php 
+                // Check if user has premium subscription for premium nav link
+                $nav_user_id = $_SESSION['user_id'];
+                $nav_stmt = $conn->prepare("SELECT plan_type FROM Subscriptions WHERE user_id = ? AND end_date > CURDATE() ORDER BY end_date DESC LIMIT 1");
+                $nav_stmt->bind_param("i", $nav_user_id);
+                $nav_stmt->execute();
+                $nav_stmt->bind_result($nav_plan_type);
+                $nav_has_premium = $nav_stmt->fetch();
+                $nav_stmt->close();
+                
+                if ($nav_has_premium): ?>
+                    <a href="who-liked-me.php" style="color: #fbbf24; font-weight: 700;">👁️ Who Liked Me</a>
+                <?php endif; ?>
                 <a href="profile_view.php">Profile</a>
                 <a href="logout.php" class="btn-ghost">Logout</a>
             <?php endif; ?>

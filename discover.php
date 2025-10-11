@@ -83,12 +83,35 @@ $stmt->bind_result($min_age, $max_age, $gender_pref);
 $stmt->fetch();
 $stmt->close();
 
-// Fetch next profile to show (exclude already liked/passed/blocked users and admins)
+// Check current user's subscription status for premium features
+$stmt = $conn->prepare("
+    SELECT plan_type, end_date 
+    FROM Subscriptions 
+    WHERE user_id = ? AND end_date > CURDATE() 
+    ORDER BY end_date DESC LIMIT 1
+");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($current_plan, $plan_end_date);
+$stmt->fetch();
+$stmt->close();
+
+$is_premium = !empty($current_plan);
+
+// Fetch next profile to show with premium user prioritization
 $sql = "
-    SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path
+    SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path,
+           s.plan_type,
+           CASE 
+               WHEN s.plan_type = 'boost_10x' THEN RAND() * 10
+               WHEN s.plan_type = 'boost_5x' THEN RAND() * 5  
+               WHEN s.plan_type = 'boost_2x' THEN RAND() * 2
+               ELSE RAND()
+           END as priority_score
     FROM Users u
     JOIN Profiles p ON u.id = p.user_id
     JOIN Photos ph ON ph.user_id = u.id AND ph.is_primary=1 AND ph.is_active=1
+    LEFT JOIN Subscriptions s ON u.id = s.user_id AND s.end_date > CURDATE()
     WHERE u.id != ?
     AND u.role != 'admin'
     AND p.name IS NOT NULL 
@@ -119,14 +142,26 @@ if ($gender_pref && $gender_pref !== 'any') {
     $types .= "s";
 }
 
-$sql .= " ORDER BY RAND() LIMIT 1";
+$sql .= " ORDER BY priority_score DESC, RAND() LIMIT 1";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
-$stmt->bind_result($profile_id, $profile_name, $profile_age, $profile_gender, $profile_bio, $photo_path);
-$has_profile = $stmt->fetch();
+$result = $stmt->get_result();
+$profile_data = $result->fetch_assoc();
 $stmt->close();
+
+// Extract variables for backward compatibility
+$has_profile = !empty($profile_data);
+if ($has_profile) {
+    $profile_id = $profile_data['id'];
+    $profile_name = $profile_data['name'];
+    $profile_age = $profile_data['age'];
+    $profile_gender = $profile_data['gender'];
+    $profile_bio = $profile_data['bio'];
+    $photo_path = $profile_data['file_path'];
+    $profile_plan_type = $profile_data['plan_type'];
+}
 
 $photo_base = "MBusers/photos/";
 ?>
@@ -320,14 +355,6 @@ $photo_base = "MBusers/photos/";
             box-shadow: 0 12px 32px rgba(167,139,250,0.4);
         }
         
-        .btn-block {
-            background: linear-gradient(135deg, #64748b, #475569);
-            color: white;
-            width: 60px;
-            height: 60px;
-            font-size: 1.4rem;
-        }
-        
         .empty-state {
             background: rgba(255,255,255,0.05);
             backdrop-filter: blur(20px);
@@ -445,6 +472,53 @@ $photo_base = "MBusers/photos/";
                 font-size: 2rem;
             }
         }
+        
+        /* Premium Badge Styles */
+        .premium-badge-card {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #1f2937;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(251,191,36,0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .premium-inline-badge {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+            font-size: 1.2rem;
+            filter: drop-shadow(0 2px 4px rgba(251,191,36,0.5));
+        }
+        
+        .badge-icon {
+            font-size: 0.9rem;
+        }
+        
+        /* Premium card glow effect */
+        .profile-card:has(.premium-badge-card) {
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.2),
+                0 0 0 2px rgba(251,191,36,0.3),
+                0 0 20px rgba(251,191,36,0.2);
+        }
+        
+        .profile-card:has(.premium-badge-card):hover {
+            box-shadow: 
+                0 24px 48px rgba(0,0,0,0.3),
+                0 0 0 2px rgba(251,191,36,0.4),
+                0 0 30px rgba(251,191,36,0.3);
+        }
     </style>
 </head>
 <body>
@@ -459,6 +533,23 @@ $photo_base = "MBusers/photos/";
     <?php if ($has_profile): ?>
         <div class="discover-container">
             <div class="profile-card">
+                <?php if (!empty($profile_plan_type)): ?>
+                    <div class="premium-badge-card">
+                        <?php 
+                        $badge_text = '';
+                        $badge_icon = '✨';
+                        switch ($profile_plan_type) {
+                            case 'boost_2x': $badge_text = '2x Boost'; $badge_icon = '🚀'; break;
+                            case 'boost_5x': $badge_text = '5x Boost'; $badge_icon = '⚡'; break;
+                            case 'boost_10x': $badge_text = '10x Boost'; $badge_icon = '💎'; break;
+                            default: $badge_text = 'Premium'; break;
+                        }
+                        ?>
+                        <span class="badge-icon"><?php echo $badge_icon; ?></span>
+                        <?php echo $badge_text; ?>
+                    </div>
+                <?php endif; ?>
+                
                 <img src="<?php echo $photo_base . htmlspecialchars($photo_path); ?>" 
                      alt="<?php echo htmlspecialchars($profile_name); ?>" 
                      class="profile-image">
@@ -466,6 +557,11 @@ $photo_base = "MBusers/photos/";
                 <div class="profile-overlay">
                     <h2 class="profile-name">
                         <?php echo htmlspecialchars($profile_name); ?>, <?php echo htmlspecialchars($profile_age); ?>
+                        <?php if (!empty($profile_plan_type)): ?>
+                            <span class="premium-inline-badge">
+                                <?php echo $badge_icon; ?>
+                            </span>
+                        <?php endif; ?>
                     </h2>
                     <div class="profile-details">
                         <span class="profile-tag"><?php echo ucfirst(htmlspecialchars($profile_gender)); ?></span>
@@ -494,13 +590,6 @@ $photo_base = "MBusers/photos/";
                     <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
                     <button type="submit" name="action" value="like" class="action-btn btn-like" title="Like">
                         ♡
-                    </button>
-                </form>
-
-                <form method="POST" style="display:inline" onsubmit="return confirm('Block this user? They won\'t appear in your feed again.')">
-                    <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                    <button type="submit" name="action" value="block" class="action-btn btn-block" title="Block">
-                        ⊘
                     </button>
                 </form>
             </div>

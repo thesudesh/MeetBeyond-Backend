@@ -84,6 +84,21 @@ if ($is_logged_in) {
         $stmt->bind_result($match_count);
         $stmt->fetch();
         $stmt->close();
+        
+        // Check subscription status for dashboard
+        $stmt = $conn->prepare("
+            SELECT plan_type, end_date 
+            FROM Subscriptions 
+            WHERE user_id = ? AND end_date > CURDATE() 
+            ORDER BY end_date DESC LIMIT 1
+        ");
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $stmt->bind_result($user_plan_type, $user_plan_end);
+        $stmt->fetch();
+        $stmt->close();
+        
+        $user_is_premium = !empty($user_plan_type);
     }
 
     // Fetch email for fallback display
