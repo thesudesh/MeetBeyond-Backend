@@ -283,7 +283,7 @@ $stats['pending_reports'] = $result->fetch_assoc()['count'];
         </a>
     </div>
 
-    <!-- Development Tools -->
+    <!-- Development Tools
     <h2 style="font-size:1.5rem;font-weight:600;margin-bottom:20px;color:var(--text);margin-top:40px">
         🛠️ Development Tools
     </h2>
@@ -308,7 +308,7 @@ $stats['pending_reports'] = $result->fetch_assoc()['count'];
                 <p style="color:var(--muted);font-size:0.875rem;margin:0">Direct database management</p>
             </div>
         </a>
-    </div>
+    </div> -->
 </main>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
