@@ -175,9 +175,14 @@ $photo_base = "MBusers/photos/";
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         .discover-container {
-            max-width: 420px;
+            max-width: 100%;
             margin: 0 auto;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            gap: 40px;
         }
         
         .discover-header {
@@ -206,6 +211,94 @@ $photo_base = "MBusers/photos/";
             font-weight: 500;
         }
         
+        .swipe-area {
+            flex: 1;
+            height: 600px;
+            max-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .swipe-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.05);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border-radius: inherit;
+        }
+        
+        .swipe-area:hover::before {
+            opacity: 1;
+        }
+        
+        .swipe-area.left {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 82, 0.1));
+            border: 2px dashed rgba(255, 107, 107, 0.3);
+        }
+        
+        .swipe-area.left:hover {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(238, 90, 82, 0.2));
+            border-color: rgba(255, 107, 107, 0.5);
+            transform: scale(1.02);
+        }
+        
+        .swipe-area.right {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(56, 142, 60, 0.1));
+            border: 2px dashed rgba(76, 175, 80, 0.3);
+        }
+        
+        .swipe-area.right:hover {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(56, 142, 60, 0.2));
+            border-color: rgba(76, 175, 80, 0.5);
+            transform: scale(1.02);
+        }
+        
+        .profile-card-wrapper {
+            flex: 1;
+            max-width: 420px;
+            height: 600px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .swipe-content {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .swipe-area:hover .swipe-content {
+            color: rgba(255,255,255,1);
+            transform: scale(1.1);
+        }
+        
+        .swipe-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .swipe-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .swipe-hint {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
         .profile-card {
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(30px);
@@ -216,6 +309,9 @@ $photo_base = "MBusers/photos/";
             position: relative;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             transform-origin: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .profile-card:hover {
@@ -239,6 +335,13 @@ $photo_base = "MBusers/photos/";
             background: linear-gradient(transparent, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.95));
             padding: 40px 32px 32px;
             color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .profile-info {
+            flex: 1;
         }
         
         .profile-name {
@@ -269,90 +372,33 @@ $photo_base = "MBusers/photos/";
         .profile-bio {
             color: rgba(255,255,255,0.9);
             line-height: 1.6;
-            margin-bottom: 20px;
             font-size: 1.05rem;
         }
         
-        .view-profile-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--accent-purple);
-            font-weight: 700;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: rgba(167,139,250,0.15);
-            padding: 10px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(167,139,250,0.3);
-        }
-        
-        .view-profile-link:hover {
-            background: rgba(167,139,250,0.25);
-            transform: translateX(4px);
-        }
-        
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 24px;
-            padding: 40px 0;
-            margin-top: 32px;
-        }
-        
-        .action-btn {
-            width: 72px;
-            height: 72px;
+        .view-profile-btn {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            font-size: 1.8rem;
-            position: relative;
-            overflow: hidden;
+            font-size: 1.2rem;
+            text-decoration: none;
+            margin-left: 16px;
+            flex-shrink: 0;
         }
         
-        .action-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: inherit;
-            border-radius: inherit;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .action-btn:hover {
-            transform: translateY(-4px) scale(1.1);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-        }
-        
-        .action-btn:hover::before {
-            opacity: 0.2;
-        }
-        
-        .action-btn:active {
-            transform: translateY(-2px) scale(1.05);
-        }
-        
-        .btn-reject {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        .view-profile-btn:hover {
+            background: rgba(124,58,237,0.9);
+            border-color: rgba(124,58,237,1);
             color: white;
-        }
-        
-        .btn-like {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-            color: white;
-            width: 84px;
-            height: 84px;
-            font-size: 2.2rem;
-            box-shadow: 0 12px 32px rgba(167,139,250,0.4);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(124,58,237,0.4);
         }
         
         .empty-state {
@@ -362,6 +408,8 @@ $photo_base = "MBusers/photos/";
             padding: 80px 40px;
             text-align: center;
             border: 2px solid rgba(255,255,255,0.1);
+            max-width: 500px;
+            margin: 0 auto;
         }
         
         .empty-icon {
@@ -383,6 +431,98 @@ $photo_base = "MBusers/photos/";
             font-size: 1.1rem;
             margin-bottom: 32px;
             line-height: 1.6;
+        }
+        
+        /* Premium Badge Styles */
+        .premium-badge-card {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #1f2937;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(251,191,36,0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .premium-inline-badge {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+            font-size: 1.2rem;
+            filter: drop-shadow(0 2px 4px rgba(251,191,36,0.5));
+        }
+        
+        .badge-icon {
+            font-size: 0.9rem;
+        }
+        
+        /* Premium card glow effect */
+        .profile-card:has(.premium-badge-card) {
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.2),
+                0 0 0 2px rgba(251,191,36,0.3),
+                0 0 20px rgba(251,191,36,0.2);
+        }
+        
+        .profile-card:has(.premium-badge-card):hover {
+            box-shadow: 
+                0 24px 48px rgba(0,0,0,0.3),
+                0 0 0 2px rgba(251,191,36,0.4),
+                0 0 30px rgba(251,191,36,0.3);
+        }
+        
+        @media (max-width: 1024px) {
+            .discover-container {
+                flex-direction: column;
+                gap: 20px;
+                min-height: auto;
+            }
+            
+            .swipe-area {
+                height: 120px;
+                flex: none;
+                width: 100%;
+                max-width: 420px;
+                margin: 0 auto;
+            }
+            
+            .swipe-area.left {
+                order: 2;
+            }
+            
+            .profile-card-wrapper {
+                order: 1;
+                flex: none;
+                width: 100%;
+                max-width: 420px;
+                margin: 0 auto;
+            }
+            
+            .swipe-area.right {
+                order: 3;
+            }
+            
+            .swipe-icon {
+                font-size: 2.5rem;
+                margin-bottom: 8px;
+            }
+            
+            .swipe-text {
+                font-size: 1.1rem;
+            }
+            
+            .swipe-hint {
+                font-size: 0.8rem;
+            }
         }
         
         .match-popup {
@@ -440,7 +580,6 @@ $photo_base = "MBusers/photos/";
             gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
-        }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
@@ -448,7 +587,7 @@ $photo_base = "MBusers/photos/";
         }
         
         @media (max-width: 480px) {
-            .discover-container {
+            .profile-card-wrapper {
                 margin: 0 10px;
             }
             
@@ -460,64 +599,10 @@ $photo_base = "MBusers/photos/";
                 height: 460px;
             }
             
-            .action-btn {
-                width: 64px;
-                height: 64px;
-                font-size: 1.6rem;
+            .swipe-area {
+                height: 100px;
+                margin: 0 10px;
             }
-            
-            .btn-like {
-                width: 76px;
-                height: 76px;
-                font-size: 2rem;
-            }
-        }
-        
-        /* Premium Badge Styles */
-        .premium-badge-card {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #1f2937;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            z-index: 10;
-            box-shadow: 0 4px 12px rgba(251,191,36,0.3);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .premium-inline-badge {
-            display: inline-flex;
-            align-items: center;
-            margin-left: 8px;
-            font-size: 1.2rem;
-            filter: drop-shadow(0 2px 4px rgba(251,191,36,0.5));
-        }
-        
-        .badge-icon {
-            font-size: 0.9rem;
-        }
-        
-        /* Premium card glow effect */
-        .profile-card:has(.premium-badge-card) {
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.2),
-                0 0 0 2px rgba(251,191,36,0.3),
-                0 0 20px rgba(251,191,36,0.2);
-        }
-        
-        .profile-card:has(.premium-badge-card):hover {
-            box-shadow: 
-                0 24px 48px rgba(0,0,0,0.3),
-                0 0 0 2px rgba(251,191,36,0.4),
-                0 0 30px rgba(251,191,36,0.3);
         }
     </style>
 </head>
@@ -532,67 +617,78 @@ $photo_base = "MBusers/photos/";
 
     <?php if ($has_profile): ?>
         <div class="discover-container">
-            <div class="profile-card">
-                <?php if (!empty($profile_plan_type)): ?>
-                    <div class="premium-badge-card">
-                        <?php 
-                        $badge_text = '';
-                        $badge_icon = '✨';
-                        switch ($profile_plan_type) {
-                            case 'boost_2x': $badge_text = '2x Boost'; $badge_icon = '🚀'; break;
-                            case 'boost_5x': $badge_text = '5x Boost'; $badge_icon = '⚡'; break;
-                            case 'boost_10x': $badge_text = '10x Boost'; $badge_icon = '💎'; break;
-                            default: $badge_text = 'Premium'; break;
-                        }
-                        ?>
-                        <span class="badge-icon"><?php echo $badge_icon; ?></span>
-                        <?php echo $badge_text; ?>
-                    </div>
-                <?php endif; ?>
-                
-                <img src="<?php echo $photo_base . htmlspecialchars($photo_path); ?>" 
-                     alt="<?php echo htmlspecialchars($profile_name); ?>" 
-                     class="profile-image">
-                
-                <div class="profile-overlay">
-                    <h2 class="profile-name">
-                        <?php echo htmlspecialchars($profile_name); ?>, <?php echo htmlspecialchars($profile_age); ?>
-                        <?php if (!empty($profile_plan_type)): ?>
-                            <span class="premium-inline-badge">
-                                <?php echo $badge_icon; ?>
-                            </span>
-                        <?php endif; ?>
-                    </h2>
-                    <div class="profile-details">
-                        <span class="profile-tag"><?php echo ucfirst(htmlspecialchars($profile_gender)); ?></span>
-                    </div>
-                    <?php if ($profile_bio): ?>
-                    <p class="profile-bio">
-                        <?php echo nl2br(htmlspecialchars(mb_strimwidth($profile_bio, 0, 120, "..."))); ?>
-                    </p>
+            <!-- Left Pass Area -->
+            <form method="POST" class="swipe-area left" onclick="this.querySelector('button').click()">
+                <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
+                <button type="submit" name="action" value="pass" style="display: none;"></button>
+                <div class="swipe-content">
+                    <span class="swipe-icon">👎</span>
+                    <div class="swipe-text">Pass</div>
+                    <div class="swipe-hint">Click to pass</div>
+                </div>
+            </form>
+
+            <!-- Profile Card -->
+            <div class="profile-card-wrapper">
+                <div class="profile-card">
+                    <?php if (!empty($profile_plan_type)): ?>
+                        <div class="premium-badge-card">
+                            <?php 
+                            $badge_text = '';
+                            $badge_icon = '✨';
+                            switch ($profile_plan_type) {
+                                case 'boost_2x': $badge_text = '2x Boost'; $badge_icon = '🚀'; break;
+                                case 'boost_5x': $badge_text = '5x Boost'; $badge_icon = '⚡'; break;
+                                case 'boost_10x': $badge_text = '10x Boost'; $badge_icon = '💎'; break;
+                                default: $badge_text = 'Premium'; break;
+                            }
+                            ?>
+                            <span class="badge-icon"><?php echo $badge_icon; ?></span>
+                            <?php echo $badge_text; ?>
+                        </div>
                     <?php endif; ?>
-                    <a href="profile_view.php?id=<?php echo $profile_id; ?>" class="view-profile-link">
-                        View Full Profile
-                        <span>→</span>
-                    </a>
+                    
+                    <img src="<?php echo $photo_base . htmlspecialchars($photo_path); ?>" 
+                         alt="<?php echo htmlspecialchars($profile_name); ?>" 
+                         class="profile-image">
+                    
+                    <div class="profile-overlay">
+                        <div class="profile-info">
+                            <h2 class="profile-name">
+                                <?php echo htmlspecialchars($profile_name); ?>, <?php echo htmlspecialchars($profile_age); ?>
+                                <?php if (!empty($profile_plan_type)): ?>
+                                    <span class="premium-inline-badge">
+                                        <?php echo $badge_icon; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </h2>
+                            <div class="profile-details">
+                                <span class="profile-tag"><?php echo ucfirst(htmlspecialchars($profile_gender)); ?></span>
+                            </div>
+                            <?php if ($profile_bio): ?>
+                            <p class="profile-bio">
+                                <?php echo nl2br(htmlspecialchars(mb_strimwidth($profile_bio, 0, 120, "..."))); ?>
+                            </p>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <a href="profile_view.php?id=<?php echo $profile_id; ?>" class="view-profile-btn" title="View Profile">
+                            👀
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <div class="action-buttons">
-                <form method="POST" style="display:inline">
-                    <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                    <button type="submit" name="action" value="pass" class="action-btn btn-reject" title="Pass">
-                        ✕
-                    </button>
-                </form>
-
-                <form method="POST" style="display:inline">
-                    <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                    <button type="submit" name="action" value="like" class="action-btn btn-like" title="Like">
-                        ♡
-                    </button>
-                </form>
-            </div>
+            <!-- Right Like Area -->
+            <form method="POST" class="swipe-area right" onclick="this.querySelector('button').click()">
+                <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
+                <button type="submit" name="action" value="like" style="display: none;"></button>
+                <div class="swipe-content">
+                    <span class="swipe-icon">💖</span>
+                    <div class="swipe-text">Like</div>
+                    <div class="swipe-hint">Click to like</div>
+                </div>
+            </form>
         </div>
     <?php else: ?>
         <div class="discover-container">
@@ -632,9 +728,12 @@ $photo_base = "MBusers/photos/";
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') {
-        document.querySelector('button[value="pass"]')?.click();
+        document.querySelector('.swipe-area.left button')?.click();
     } else if (e.key === 'ArrowRight') {
-        document.querySelector('button[value="like"]')?.click();
+        document.querySelector('.swipe-area.right button')?.click();
+    } else if (e.key === 'ArrowUp' || e.key === ' ') {
+        e.preventDefault();
+        document.querySelector('.swipe-area.right button')?.click();
     }
 });
 
@@ -657,13 +756,24 @@ if (card) {
         const swipeThreshold = 100;
         if (touchEndX < touchStartX - swipeThreshold) {
             // Swipe left - pass
-            document.querySelector('button[value="pass"]')?.click();
+            document.querySelector('.swipe-area.left button')?.click();
         } else if (touchEndX > touchStartX + swipeThreshold) {
             // Swipe right - like
-            document.querySelector('button[value="like"]')?.click();
+            document.querySelector('.swipe-area.right button')?.click();
         }
     }
 }
+
+// Add visual feedback for swipe areas
+document.querySelectorAll('.swipe-area').forEach(area => {
+    area.addEventListener('mouseenter', () => {
+        area.style.transform = 'scale(1.02)';
+    });
+    
+    area.addEventListener('mouseleave', () => {
+        area.style.transform = 'scale(1)';
+    });
+});
 </script>
 </body>
 </html>

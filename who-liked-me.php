@@ -109,62 +109,68 @@ $page_title = "Who Liked Me";
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <style>
         .premium-header {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-            padding: 40px 20px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 50px 30px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             border-radius: 16px;
         }
         
         .premium-header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+            letter-spacing: -0.02em;
         }
         
         .premium-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #1f2937;
+            gap: 8px;
+            background: rgba(251,191,36,0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.3);
             padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            margin-bottom: 24px;
         }
         
         .likes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
             padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
         .like-card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
-            padding: 24px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            aspect-ratio: 3/4;
+            display: flex;
+            flex-direction: column;
         }
         
         .like-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
             border-color: rgba(255,255,255,0.2);
         }
         
         .like-card.premium-liker {
             border-color: rgba(251,191,36,0.3);
-            background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05));
         }
         
         .like-card.premium-liker::before {
@@ -175,82 +181,117 @@ $page_title = "Who Liked Me";
             right: 0;
             height: 3px;
             background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            z-index: 10;
         }
         
-        .like-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid rgba(255,255,255,0.2);
-            margin-bottom: 16px;
-        }
-        
-        .like-info h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 8px;
+        .like-photo-container {
+            position: relative;
+            flex: 1;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            overflow: hidden;
         }
         
-        .like-meta {
-            color: var(--muted);
-            font-size: 0.9rem;
-            margin-bottom: 12px;
+        .like-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
-        .like-bio {
-            color: var(--muted);
+        .like-photo-placeholder {
+            font-size: 4rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .like-premium-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .like-info-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 30px 16px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .like-user-info {
+            flex: 1;
+        }
+        
+        .like-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .like-details {
             font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 20px;
+            opacity: 0.9;
+            margin-bottom: 2px;
+        }
+        
+        .like-date {
+            font-size: 0.8rem;
+            opacity: 0.7;
         }
         
         .like-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
+            margin-left: 12px;
         }
         
-        .btn-like-back {
-            flex: 1;
-            background: linear-gradient(135deg, #ec4899, #db2777);
+        .btn-like-back, .btn-view-profile {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
             color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            font-size: 1.1rem;
+            text-decoration: none;
         }
         
         .btn-like-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(236,72,153,0.3);
-        }
-        
-        .btn-view-profile {
-            background: rgba(255,255,255,0.1);
-            color: var(--text);
-            border: 2px solid rgba(255,255,255,0.2);
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
+            background: rgba(236,72,153,0.9);
+            border-color: rgba(236,72,153,1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(236,72,153,0.4);
         }
         
         .btn-view-profile:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.3);
+            background: rgba(124,58,237,0.9);
+            border-color: rgba(124,58,237,1);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(124,58,237,0.4);
         }
         
         .empty-state {
@@ -266,14 +307,31 @@ $page_title = "Who Liked Me";
         }
         
         .liker-premium-badge {
-            font-size: 1.1rem;
-            filter: drop-shadow(0 2px 4px rgba(251,191,36,0.5));
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
         
-        .liked-date {
-            font-size: 0.8rem;
-            color: var(--muted);
-            opacity: 0.7;
+        .premium-section {
+            text-align: center;
+            margin: 60px auto;
+            padding: 40px 30px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            max-width: 700px;
+        }
+        
+        .premium-section h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        .premium-section p {
+            opacity: 0.85;
+            line-height: 1.6;
+            font-size: 1rem;
         }
     </style>
 </head>
@@ -283,12 +341,12 @@ $page_title = "Who Liked Me";
     <div class="container">
         <div class="premium-header">
             <div class="premium-badge">
-                <span>✨</span>
+                <span>⭐</span>
                 Premium Feature
             </div>
             <h1>Who Liked Me</h1>
-            <p style="opacity: 0.9; font-size: 1.1rem;">
-                See everyone who liked your profile
+            <p style="opacity: 0.8; font-size: 1rem; max-width: 500px; margin: 0 auto;">
+                Discover everyone who's interested in your profile
             </p>
         </div>
         
@@ -312,85 +370,66 @@ $page_title = "Who Liked Me";
             <div class="likes-grid">
                 <?php foreach ($liked_by_users as $liker): ?>
                     <div class="like-card <?php echo !empty($liker['liker_plan']) ? 'premium-liker' : ''; ?>">
-                        <?php if (!empty($liker['liker_plan'])): ?>
-                            <div style="position: absolute; top: 16px; right: 16px;">
-                                <span class="liker-premium-badge">
+                        <div class="like-photo-container">
+                            <?php if ($liker['photo']): ?>
+                                <img src="MBusers/photos/<?php echo htmlspecialchars($liker['photo']); ?>" 
+                                     alt="<?php echo htmlspecialchars($liker['name']); ?>" 
+                                     class="like-photo">
+                            <?php else: ?>
+                                <div class="like-photo-placeholder">👤</div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($liker['liker_plan'])): ?>
+                                <div class="like-premium-indicator">
                                     <?php 
                                     switch ($liker['liker_plan']) {
                                         case 'boost_2x': echo '🚀'; break;
                                         case 'boost_5x': echo '⚡'; break;
                                         case 'boost_10x': echo '💎'; break;
-                                        default: echo '✨'; break;
+                                        default: echo '⭐'; break;
                                     }
                                     ?>
-                                </span>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <div style="text-align: center;">
-                            <?php if ($liker['photo']): ?>
-                                <img src="MBusers/photos/<?php echo htmlspecialchars($liker['photo']); ?>" 
-                                     alt="<?php echo htmlspecialchars($liker['name']); ?>" 
-                                     class="like-avatar">
-                            <?php else: ?>
-                                <div class="like-avatar" style="background: var(--accent-purple); display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-                                    👤
                                 </div>
                             <?php endif; ?>
-                        </div>
-                        
-                        <div class="like-info">
-                            <h3>
-                                <?php echo htmlspecialchars($liker['name']); ?>, <?php echo $liker['age']; ?>
-                                <?php if (!empty($liker['liker_plan'])): ?>
-                                    <span class="liker-premium-badge">
-                                        <?php 
-                                        switch ($liker['liker_plan']) {
-                                            case 'boost_2x': echo '🚀'; break;
-                                            case 'boost_5x': echo '⚡'; break;
-                                            case 'boost_10x': echo '💎'; break;
-                                            default: echo '✨'; break;
-                                        }
-                                        ?>
-                                    </span>
-                                <?php endif; ?>
-                            </h3>
                             
-                            <div class="like-meta">
-                                <?php echo ucfirst($liker['gender']); ?> • 
-                                <span class="liked-date">
-                                    Liked <?php echo date('M j, Y', strtotime($liker['liked_date'])); ?>
-                                </span>
-                            </div>
-                            
-                            <?php if ($liker['bio']): ?>
-                                <div class="like-bio">
-                                    <?php echo nl2br(htmlspecialchars(mb_strimwidth($liker['bio'], 0, 100, "..."))); ?>
+                            <div class="like-info-overlay">
+                                <div class="like-user-info">
+                                    <div class="like-name">
+                                        <?php echo htmlspecialchars($liker['name']); ?>, <?php echo $liker['age']; ?>
+                                    </div>
+                                    <div class="like-details">
+                                        <?php echo ucfirst($liker['gender']); ?>
+                                        <?php if ($liker['bio']): ?>
+                                            • <?php echo htmlspecialchars(mb_strimwidth($liker['bio'], 0, 40, "...")); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="like-date">
+                                        Liked <?php echo date('M j', strtotime($liker['liked_date'])); ?>
+                                    </div>
                                 </div>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div class="like-actions">
-                            <form method="post" style="flex: 1;">
-                                <input type="hidden" name="action" value="like_back">
-                                <input type="hidden" name="target_id" value="<?php echo $liker['id']; ?>">
-                                <button type="submit" class="btn-like-back">
-                                    <span>💖</span>
-                                    Like Back
-                                </button>
-                            </form>
-                            <a href="profile_view.php?id=<?php echo $liker['id']; ?>" class="btn-view-profile">
-                                View Profile
-                            </a>
+                                
+                                <div class="like-actions">
+                                    <form method="post" style="display: inline;">
+                                        <input type="hidden" name="action" value="like_back">
+                                        <input type="hidden" name="target_id" value="<?php echo $liker['id']; ?>">
+                                        <button type="submit" class="btn-like-back" title="Like Back">
+                                            ❤️
+                                        </button>
+                                    </form>
+                                    <a href="profile_view.php?id=<?php echo $liker['id']; ?>" class="btn-view-profile" title="View Profile">
+                                        👀
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
         
-        <div style="text-align: center; margin: 60px 0; padding: 40px; background: rgba(255,255,255,0.05); border-radius: 16px;">
-            <h3 style="margin-bottom: 16px;">Premium Benefits</h3>
-            <p style="opacity: 0.8; max-width: 600px; margin: 0 auto;">
+        <div class="premium-section">
+            <h3>Premium Benefits</h3>
+            <p>
                 As a premium member, you can see everyone who liked your profile and like them back instantly. 
                 This feature helps you discover mutual interests faster and increases your chances of making meaningful connections.
             </p>

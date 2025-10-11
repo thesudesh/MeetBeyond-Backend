@@ -71,43 +71,210 @@ $photo_base = "MBusers/photos/";
     <link rel="stylesheet" href="assets/style.css">
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .browse-header {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 50px 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 16px;
+        }
+        
+        .browse-header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        
+        .browse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .browse-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            aspect-ratio: 3/4;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .browse-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .browse-photo-container {
+            position: relative;
+            flex: 1;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .browse-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .browse-photo-placeholder {
+            font-size: 4rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .browse-info-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 30px 16px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .browse-user-info {
+            flex: 1;
+        }
+        
+        .browse-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .browse-details {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 2px;
+        }
+        
+        .browse-bio {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+        
+        .browse-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+        }
+        
+        .btn-browse-view {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+        
+        .btn-browse-view:hover {
+            background: rgba(124,58,237,0.9);
+            border-color: rgba(124,58,237,1);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+    </style>
 </head>
 <body>
 <?php include_once __DIR__ . '/includes/nav.php'; ?>
 
 <main class="container">
-    <div class="card">
-        <div class="page-top">
-            <div>
-                <h1 class="page-title">Browse Profiles</h1>
-                <p class="lead">Discover people on <span class="brand"><span class="accent">Meet</span> Beyond</span> — swipe, like, or view profiles.</p>
-            </div>
-            <div class="text-center muted" style="min-width:160px">Explore · Safe · Real</div>
-        </div>
+    <div class="browse-header">
+        <h1>Browse Profiles</h1>
+        <p style="opacity: 0.8; font-size: 1rem; max-width: 500px; margin: 0 auto;">
+            Discover amazing people on Meet Beyond — view profiles and make connections
+        </p>
+    </div>
 
-        <?php if (empty($users)): ?>
-            <div class="text-center" style="padding:36px 0;color:var(--muted);">No profiles to show right now. Try again soon.</div>
-        <?php else: ?>
-            <div class="grid">
-                <?php foreach ($users as $u): ?>
-                    <article class="profile-card">
-                        <img class="profile-photo" src="<?php echo $photo_base . htmlspecialchars($u['photo']); ?>" alt="Profile Photo">
-                        <div class="profile-body">
-                            <div class="profile-name"><?php echo htmlspecialchars($u['name']); ?></div>
-                            <div class="profile-meta"><?php echo htmlspecialchars($u['age']); ?> • <?php echo ucfirst(htmlspecialchars($u['gender'])); ?></div>
-                            <div class="profile-bio"><?php $bio = trim($u['bio']); echo $bio ? htmlspecialchars(mb_strimwidth($bio, 0, 140, "...")) : '<span class="muted">No bio yet</span>'; ?></div>
-                            <div class="profile-actions">
-                                <a class="icon-btn view" title="View Profile" aria-label="View Profile" href="profile_view.php?id=<?php echo $u['id']; ?>">
-                                    <svg aria-hidden="true"><use xlink:href="assets/icons.svg#icon-view"></use></svg>
+    <?php if (empty($users)): ?>
+        <div class="empty-state">
+            <h3>No profiles available</h3>
+            <p>Check back soon for new profiles to discover!</p>
+        </div>
+    <?php else: ?>
+        <div class="browse-grid">
+            <?php foreach ($users as $u): ?>
+                <div class="browse-card">
+                    <div class="browse-photo-container">
+                        <?php if ($u['photo']): ?>
+                            <img src="<?php echo $photo_base . htmlspecialchars($u['photo']); ?>" 
+                                 alt="<?php echo htmlspecialchars($u['name']); ?>" 
+                                 class="browse-photo">
+                        <?php else: ?>
+                            <div class="browse-photo-placeholder">👤</div>
+                        <?php endif; ?>
+                        
+                        <div class="browse-info-overlay">
+                            <div class="browse-user-info">
+                                <div class="browse-name">
+                                    <?php echo htmlspecialchars($u['name']); ?>, <?php echo $u['age']; ?>
+                                </div>
+                                <div class="browse-details">
+                                    <?php echo ucfirst($u['gender']); ?>
+                                </div>
+                                <?php if ($u['bio']): ?>
+                                    <div class="browse-bio">
+                                        <?php echo htmlspecialchars(mb_strimwidth(trim($u['bio']), 0, 50, "...")); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div class="browse-actions">
+                                <a href="profile_view.php?id=<?php echo $u['id']; ?>" class="btn-browse-view" title="View Profile">
+                                    👀
                                 </a>
                             </div>
                         </div>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-    </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </main>
 
 <a href="index.php" class="back-btn" title="Back to Dashboard">←</a>

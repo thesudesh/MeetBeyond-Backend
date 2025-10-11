@@ -45,24 +45,28 @@ $page_title = "Premium Subscriptions";
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <style>
         .subscription-hero {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-            padding: 60px 20px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px 20px;
             text-align: center;
             margin-bottom: 40px;
+            border-radius: 12px;
         }
         
         .subscription-hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
         }
         
         .subscription-hero p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 600px;
+            font-size: 1rem;
+            opacity: 0.8;
+            max-width: 500px;
             margin: 0 auto;
+            color: var(--muted);
         }
         
         .subscription-grid {
@@ -264,8 +268,8 @@ $page_title = "Premium Subscriptions";
     <?php include 'includes/nav.php'; ?>
     
     <div class="subscription-hero">
-        <h1>✨ Premium Features</h1>
-        <p>Boost your profile visibility and get more matches with our premium subscription plans</p>
+        <h1>Premium Plans</h1>
+        <p>Enhance your profile visibility and matching experience</p>
         <?php if (isset($_GET['feature']) && $_GET['feature'] === 'who_liked'): ?>
             <div style="background: rgba(251,191,36,0.2); border: 2px solid #fbbf24; border-radius: 12px; padding: 16px; margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
                 <p style="margin: 0; font-weight: 600; color: #fbbf24;">

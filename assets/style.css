@@ -455,6 +455,39 @@ nav {
 .top-avatar{position:fixed;right:18px;top:14px;width:56px;height:56px;border-radius:50%;border:3px solid rgba(255,255,255,0.12);box-shadow:0 8px 22px rgba(0,0,0,0.28);object-fit:cover;z-index:60}
 @media (max-width:700px){.top-avatar{display:none}}
 
+/* Premium Avatar Container and Ring */
+.top-avatar-container {
+  position: fixed;
+  right: 18px;
+  top: 14px;
+  z-index: 60;
+}
+
+.top-avatar-container .top-avatar {
+  position: relative;
+  right: auto;
+  top: auto;
+}
+
+.default-avatar {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.premium-avatar {
+  border: 2px solid #fbbf24 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.28), 0 0 0 2px rgba(251,191,36,0.3) !important;
+}
+
+@media (max-width:700px) {
+  .top-avatar-container { display: none; }
+}
+
 /* Forms */
 .form-row{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
 
@@ -831,7 +864,7 @@ label{
   .grid{grid-template-columns:1fr !important;gap:16px}
   .dashboard-tiles-inline{flex-direction:column}
   .tile-big{min-width:100%}
-  .top-avatar{display:none}
+  .top-avatar-container{display:none}
 }
 
 /* Remove underlines */

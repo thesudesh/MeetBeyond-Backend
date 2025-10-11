@@ -72,6 +72,14 @@ $stmt->close();
 
 $is_self = ($viewer_id === intval($profile['user_id']));
 
+// Check if the profile being viewed has premium (for any user)
+$stmt = $conn->prepare("SELECT plan_type FROM Subscriptions WHERE user_id = ? AND end_date > CURDATE() ORDER BY end_date DESC LIMIT 1");
+$stmt->bind_param('i', $profile_id);
+$stmt->execute();
+$stmt->bind_result($viewed_user_plan_type);
+$viewed_user_has_premium = $stmt->fetch();
+$stmt->close();
+
 // friendly fallbacks
 $display_name = $profile['name'] ?: $profile['email'];
 $display_age = $profile['age'] ? intval($profile['age']) : null;
@@ -187,6 +195,11 @@ $display_age = $profile['age'] ? intval($profile['age']) : null;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+    
+    .profile-main-avatar.premium-avatar {
+      border: 4px solid #fbbf24 !important;
+      box-shadow: var(--shadow-md), 0 0 0 2px rgba(251,191,36,0.3) !important;
+    }
   </style>
  </head>
 <body>
@@ -201,9 +214,11 @@ $display_age = $profile['age'] ? intval($profile['age']) : null;
           <?php if ($has_primary && $primary_photo): ?>
             <img src="MBusers/photos/<?php echo htmlspecialchars($primary_photo); ?>" 
                  alt="<?php echo htmlspecialchars($display_name); ?>" 
+                 class="profile-main-avatar <?php echo $viewed_user_has_premium ? 'premium-avatar' : ''; ?>"
                  style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:4px solid rgba(255,255,255,0.2);box-shadow:var(--shadow-md)">
           <?php else: ?>
-            <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--accent-purple),var(--accent-pink));display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:4px solid rgba(255,255,255,0.2)">
+            <div class="profile-main-avatar <?php echo $viewed_user_has_premium ? 'premium-avatar' : ''; ?>" 
+                 style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--accent-purple),var(--accent-pink));display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:4px solid rgba(255,255,255,0.2)">
               <?php echo strtoupper(substr($display_name, 0, 1)); ?>
             </div>
           <?php endif; ?>
@@ -221,40 +236,16 @@ $display_age = $profile['age'] ? intval($profile['age']) : null;
               <?php if (!empty($prefs['location'])): ?>
                 <span class="badge">📍 <?php echo htmlspecialchars($prefs['location']); ?></span>
               <?php endif; ?>
+              <?php if ($viewed_user_has_premium): ?>
+                <span class="badge premium-badge">✨ Premium</span>
+              <?php endif; ?>
             </div>
           </div>
         </div>
         <div>
           <?php if ($is_self): ?>
             <a href="profile_edit.php" class="btn">✏️ Edit Profile</a>
-            
-            <?php 
-            // Check subscription status for current user
-            $stmt = $conn->prepare("SELECT plan_type, end_date FROM Subscriptions WHERE user_id = ? AND end_date > CURDATE() ORDER BY end_date DESC LIMIT 1");
-            $stmt->bind_param("i", $user_id);
-            $stmt->execute();
-            $stmt->bind_result($current_plan, $plan_end);
-            $has_premium = $stmt->fetch();
-            $stmt->close();
-            
-            if (!$has_premium): ?>
-              <a href="subscription.php" class="btn" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1f2937; margin-left: 12px;">
-                ✨ Upgrade to Premium
-              </a>
-            <?php else: ?>
-              <div style="margin-top: 12px; padding: 12px; background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05)); border: 2px solid rgba(251,191,36,0.3); border-radius: 12px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 1.2rem;">✨</span>
-                  <strong style="color: #fbbf24;">Premium Active</strong>
-                  <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1f2937; padding: 2px 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                    <?php echo str_replace('_', ' ', $current_plan); ?>
-                  </span>
-                </div>
-                <div style="color: var(--muted); font-size: 0.9rem; margin-top: 4px;">
-                  Active until <?php echo date('M j, Y', strtotime($plan_end)); ?>
-                </div>
-              </div>
-            <?php endif; ?>
+            <a href="subscription.php" class="btn btn-ghost" style="margin-left: 12px;">✨ Manage Premium</a>
           <?php else: ?>
             <!-- Actions for viewing other users -->
             <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -334,6 +325,44 @@ $display_age = $profile['age'] ? intval($profile['age']) : null;
             <?php echo nl2br(htmlspecialchars($profile['bio'] ?: 'This user hasn\'t written a bio yet.')); ?>
           </p>
         </div>
+
+        <?php if ($viewed_user_has_premium): ?>
+        <!-- Premium Subscription Info -->
+        <div class="card subscription-card">
+          <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+            <span>✨</span> Premium Member
+          </h3>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1f2937;padding:6px 12px;border-radius:8px;font-size:0.85rem;font-weight:700;text-transform:uppercase;">
+                <?php 
+                $plan_display = '';
+                switch ($viewed_user_plan_type) {
+                    case 'boost_2x': $plan_display = '2x Boost'; break;
+                    case 'boost_5x': $plan_display = '5x Boost'; break;
+                    case 'boost_10x': $plan_display = '10x Boost'; break;
+                    default: $plan_display = 'Premium'; break;
+                }
+                echo $plan_display; 
+                ?>
+              </span>
+              <span style="color:var(--muted);font-size:0.9rem">
+                Enhanced profile visibility and priority matching
+              </span>
+            </div>
+            <div style="color:rgba(251,191,36,0.8);font-size:0.9rem;font-style:italic">
+              <?php 
+              switch ($viewed_user_plan_type) {
+                  case 'boost_2x': echo 'This profile appears 2x more often in discovery'; break;
+                  case 'boost_5x': echo 'This profile appears 5x more often in discovery'; break;
+                  case 'boost_10x': echo 'This profile appears 10x more often in discovery'; break;
+                  default: echo 'This profile has enhanced visibility'; break;
+              }
+              ?>
+            </div>
+          </div>
+        </div>
+        <?php endif; ?>
       </section>
     </div>
   </section>

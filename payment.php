@@ -120,10 +120,12 @@ $page_title = "Secure Payment";
         }
         
         .payment-header {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
             padding: 40px 30px;
             text-align: center;
-            border-radius: 16px;
+            border-radius: 12px;
             margin-bottom: 30px;
         }
         
@@ -273,8 +275,8 @@ $page_title = "Secure Payment";
     
     <div class="payment-container">
         <div class="payment-header">
-            <h1 style="font-size: 2.5rem; margin-bottom: 12px;">🔒 Secure Payment</h1>
-            <p style="opacity: 0.9; font-size: 1.1rem;">Complete your premium upgrade securely</p>
+            <h1 style="font-size: 2.2rem; margin-bottom: 12px; font-weight: 600;">Complete Payment</h1>
+            <p style="opacity: 0.8; font-size: 1rem; color: var(--muted);">Finalize your premium subscription</p>
         </div>
         
         <?php if (isset($error_message)): ?>

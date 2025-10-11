@@ -28,6 +28,7 @@ if ($is_logged_in) {
     }
     // Try to fetch primary avatar path for top-left avatar
     $avatar_src = '';
+    $user_has_premium = false;
     $a = $conn->prepare("SELECT file_path FROM Photos WHERE user_id=? AND is_primary=1 AND is_active=1 LIMIT 1");
     if ($a) {
         $a->bind_param('i', $uid);
@@ -38,10 +39,28 @@ if ($is_logged_in) {
         }
         $a->close();
     }
+    
+    // Check if user has premium subscription for golden ring
+    $premium_check = $conn->prepare("SELECT plan_type FROM Subscriptions WHERE user_id = ? AND end_date > CURDATE() ORDER BY end_date DESC LIMIT 1");
+    if ($premium_check) {
+        $premium_check->bind_param('i', $uid);
+        $premium_check->execute();
+        $premium_check->bind_result($user_plan_type);
+        $user_has_premium = $premium_check->fetch();
+        $premium_check->close();
+    }
 }
 ?>
-<?php if ($is_logged_in && !empty($avatar_src)): ?>
-    <img src="<?php echo htmlspecialchars($avatar_src); ?>" alt="Avatar" class="top-avatar">
+<?php if ($is_logged_in): ?>
+    <div class="top-avatar-container">
+        <?php if (!empty($avatar_src)): ?>
+            <img src="<?php echo htmlspecialchars($avatar_src); ?>" alt="Avatar" class="top-avatar <?php echo $user_has_premium ? 'premium-avatar' : ''; ?>">
+        <?php else: ?>
+            <div class="top-avatar default-avatar <?php echo $user_has_premium ? 'premium-avatar' : ''; ?>">
+                <?php echo strtoupper(substr($user_name ?: 'U', 0, 1)); ?>
+            </div>
+        <?php endif; ?>
+    </div>
 <?php endif; ?>
 <header class="site-header container">
     <a class="brand" href="index.php">Meet <span class="accent">Beyond</span></a>
