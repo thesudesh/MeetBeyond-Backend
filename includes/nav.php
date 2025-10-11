@@ -51,19 +51,24 @@ if ($is_logged_in) {
     }
 }
 ?>
-<?php if ($is_logged_in): ?>
+<?php if ($is_logged_in && !$is_admin): ?>
     <div class="top-avatar-container">
-        <?php if (!empty($avatar_src)): ?>
-            <img src="<?php echo htmlspecialchars($avatar_src); ?>" alt="Avatar" class="top-avatar <?php echo $user_has_premium ? 'premium-avatar' : ''; ?>">
-        <?php else: ?>
-            <div class="top-avatar default-avatar <?php echo $user_has_premium ? 'premium-avatar' : ''; ?>">
-                <?php echo strtoupper(substr($user_name ?: 'U', 0, 1)); ?>
-            </div>
-        <?php endif; ?>
+        <a href="profile_view.php?id=<?php echo $uid; ?>" class="avatar-link">
+            <?php if (!empty($avatar_src)): ?>
+                <img src="<?php echo htmlspecialchars($avatar_src); ?>" alt="Avatar" class="top-avatar <?php echo $user_has_premium ? 'premium-avatar' : ''; ?>">
+            <?php else: ?>
+                <div class="top-avatar default-avatar <?php echo $user_has_premium ? 'premium-avatar' : ''; ?>">
+                    <?php echo strtoupper(substr($user_name ?: 'U', 0, 1)); ?>
+                </div>
+            <?php endif; ?>
+        </a>
     </div>
 <?php endif; ?>
 <header class="site-header container">
-    <a class="brand" href="index.php">Meet <span class="accent">Beyond</span></a>
+    <a class="brand" href="index.php">
+        <img src="assets/favicon.png" alt="Meet Beyond" class="brand-favicon">
+        Meet <span class="accent">Beyond</span>
+    </a>
     <nav class="nav">
         <?php if ($is_logged_in): ?>
             <?php if ($is_admin): ?>

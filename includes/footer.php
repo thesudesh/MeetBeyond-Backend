@@ -5,7 +5,10 @@
     <div class="container">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
             <div>
-                <div class="brand" style="font-size:1.3rem;margin-bottom:8px">Meet <span class="accent">Beyond</span></div>
+                <div class="brand" style="font-size:1.3rem;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+                    <img src="assets/favicon.png" alt="Meet Beyond" style="width:24px;height:24px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1))">
+                    Meet <span class="accent">Beyond</span>
+                </div>
                 <div style="color:var(--muted);font-size:0.9rem">
                     Connecting hearts, building relationships
                 </div>

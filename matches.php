@@ -59,6 +59,8 @@ if ($matches) {
         $profiles[$row['id']] = $row;
     }
 }
+
+$photo_base = "MBusers/photos/";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -69,164 +71,208 @@ if ($matches) {
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        .match-card {
-            position: relative;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            overflow: hidden;
-            border: 2px solid rgba(236,72,153,0.2);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-        .match-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(236,72,153,0.5);
-            box-shadow: 0 20px 40px rgba(236,72,153,0.3);
-        }
-        .match-card-image {
-            position: relative;
-            height: 280px;
-            overflow: hidden;
-            background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3));
-        }
-        .match-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-        .match-card:hover .match-card-image img {
-            transform: scale(1.08);
-        }
-        .match-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(236,72,153,0.95);
+        .matches-header {
+            background: rgba(255,255,255,0.03);
             backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 12px rgba(236,72,153,0.4);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .match-card-content {
-            padding: 24px;
-        }
-        .match-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .match-details {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        .match-detail-badge {
-            padding: 6px 12px;
-            background: rgba(167,139,250,0.15);
-            border: 1px solid rgba(167,139,250,0.3);
-            border-radius: 12px;
-            font-size: 0.85rem;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .match-bio {
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .match-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .match-action-btn {
-            flex: 1;
-            padding: 14px;
-            border-radius: 12px;
-            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 24px 20px;
             text-align: center;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+            margin-bottom: 32px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 16px;
         }
-        .btn-message {
-            background: linear-gradient(135deg, rgba(236,72,153,0.3), rgba(219,39,119,0.3));
-            color: #ec4899;
-            border: 2px solid rgba(236,72,153,0.4);
-        }
-        .btn-message:hover {
-            background: linear-gradient(135deg, rgba(236,72,153,0.4), rgba(219,39,119,0.4));
-            border-color: rgba(236,72,153,0.6);
-            transform: translateY(-2px);
-        }
-        .btn-profile {
-            background: rgba(167,139,250,0.15);
+        
+        .matches-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
             color: var(--text);
-            border: 2px solid rgba(167,139,250,0.3);
+            letter-spacing: -0.02em;
         }
-        .btn-profile:hover {
-            background: rgba(167,139,250,0.25);
-            border-color: rgba(167,139,250,0.5);
-            transform: translateY(-2px);
-        }
-        .matches-header {
-            text-align: center;
-            margin-bottom: 48px;
-            padding: 40px 20px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 2px solid rgba(236,72,153,0.2);
-        }
+        
         .matches-count {
-            font-size: 3rem;
-            font-weight: 800;
+            font-size: 2rem;
+            font-weight: 700;
             background: linear-gradient(135deg, #ec4899, #db2777);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 12px;
+            margin: 0;
+            min-width: 60px;
         }
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
+        
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .match-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
-            border: 2px dashed rgba(167,139,250,0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            aspect-ratio: 3/4;
+            display: flex;
+            flex-direction: column;
         }
+        
+        .match-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+            border-color: rgba(236,72,153,0.3);
+        }
+        
+        .match-photo-container {
+            position: relative;
+            flex: 1;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .match-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .match-photo-placeholder {
+            font-size: 4rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .match-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(236,72,153,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 4px 12px rgba(236,72,153,0.4);
+        }
+        
+        .match-info-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 30px 16px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .match-user-info {
+            flex: 1;
+        }
+        
+        .match-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .match-details {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 2px;
+        }
+        
+        .match-bio {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+        
+        .match-actions {
+            padding: 16px;
+            display: flex;
+            gap: 8px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+        
+        .match-action-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-message:hover {
+            background: rgba(236,72,153,0.8);
+            border-color: rgba(236,72,153,1);
+            transform: translateY(-1px);
+        }
+        
+        .btn-profile:hover {
+            background: rgba(124,58,237,0.8);
+            border-color: rgba(124,58,237,1);
+            transform: translateY(-1px);
+        }
+        
+        .empty-state {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 80px 40px;
+            text-align: center;
+            border: 2px dashed rgba(167,139,250,0.3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
         .empty-state-icon {
-            font-size: 5rem;
+            font-size: 4rem;
             margin-bottom: 24px;
             opacity: 0.6;
+        }
+        
+        .empty-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        .empty-text {
+            color: var(--muted);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -256,15 +302,10 @@ if ($matches) {
         <?php else: ?>
             <div class="matches-header">
                 <div class="matches-count"><?php echo count($matches); ?></div>
-                <h1 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; color: var(--text)">
-                    Your Matches
-                </h1>
-                <p style="font-size: 1.1rem; color: var(--muted);">
-                    You've connected with these amazing people. Start a conversation!
-                </p>
+                <h1>Your Matches</h1>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px;">
+            <div class="matches-grid">
                 <?php foreach ($matches as $match):
                     $profile = $profiles[$match['matched_user_id']];
                     $display_name = $profile['name'] ?: $profile['email'];
@@ -273,60 +314,50 @@ if ($matches) {
                     $gender = $profile['gender'] ?? '';
                     $age = $profile['age'] ?? '';
                 ?>
-                    <article class="match-card">
-                        <div class="match-card-image">
+                    <div class="match-card">
+                        <div class="match-photo-container">
                             <?php if ($has_photo): ?>
-                                <img src="MBusers/photos/<?php echo htmlspecialchars($profile['file_path']); ?>" 
-                                     alt="<?php echo htmlspecialchars($display_name); ?>">
+                                <img src="<?= $photo_base . htmlspecialchars($profile['file_path']) ?>" alt="<?= htmlspecialchars($display_name) ?>" class="match-photo">
                             <?php else: ?>
-                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 6rem; background: linear-gradient(135deg, rgba(139,92,246,0.4), rgba(236,72,153,0.4));">
-                                    <?php echo strtoupper(substr($display_name, 0, 1)); ?>
-                                </div>
+                                <div class="match-photo-placeholder">👤</div>
                             <?php endif; ?>
+                            
                             <div class="match-badge">
-                                ❤️ It's a Match!
+                                <span>💕</span>
+                                Match
                             </div>
-                        </div>
-
-                        <div class="match-card-content">
-                            <div class="match-name">
-                                <?php echo htmlspecialchars($display_name); ?>
-                                <?php if ($age): ?>
-                                    <span style="font-size: 1.2rem; color: var(--muted); font-weight: 600;"><?php echo $age; ?></span>
-                                <?php endif; ?>
-                            </div>
-
-                            <?php if ($gender || $age): ?>
-                                <div class="match-details">
-                                    <?php if ($gender): ?>
-                                        <span class="match-detail-badge">
-                                            👤 <?php echo ucfirst(htmlspecialchars($gender)); ?>
-                                        </span>
-                                    <?php endif; ?>
-                                    <?php if ($age): ?>
-                                        <span class="match-detail-badge">
-                                            🎂 <?php echo htmlspecialchars($age); ?> years
-                                        </span>
+                            
+                            <div class="match-info-overlay">
+                                <div class="match-user-info">
+                                    <div class="match-name">
+                                        <?= htmlspecialchars($display_name) ?>
+                                    </div>
+                                    <div class="match-details">
+                                        <?php 
+                                        if ($age) echo $age . ' years old';
+                                        if ($gender) echo ' • ' . ucfirst(htmlspecialchars($gender));
+                                        ?>
+                                    </div>
+                                    <?php if ($bio): ?>
+                                        <div class="match-bio">
+                                            <?= htmlspecialchars(substr($bio, 0, 80)) ?><?= strlen($bio) > 80 ? '...' : '' ?>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
-
-                            <?php if ($bio): ?>
-                                <div class="match-bio">
-                                    <?php echo htmlspecialchars($bio); ?>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="match-actions">
-                                <a href="messages.php?match=<?php echo $match['match_id']; ?>" class="match-action-btn btn-message">
-                                    💬 Message
-                                </a>
-                                <a href="profile_view.php?id=<?php echo $profile['id']; ?>" class="match-action-btn btn-profile">
-                                    👤 Profile
-                                </a>
                             </div>
                         </div>
-                    </article>
+                        
+                        <div class="match-actions">
+                            <a href="messages.php?match=<?= $match['match_id'] ?>" class="match-action-btn btn-message">
+                                <span>💬</span>
+                                Message
+                            </a>
+                            <a href="profile_view.php?id=<?= $profile['id'] ?>" class="match-action-btn btn-profile">
+                                <span>👤</span>
+                                Profile
+                            </a>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
