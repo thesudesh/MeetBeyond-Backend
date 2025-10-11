@@ -73,53 +73,58 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
 <?php include_once __DIR__ . '/includes/nav.php'; ?>
 
-<main class="container">
-    <div class="card" style="max-width:550px;margin:60px auto;text-align:center">
-        <div style="font-size:3.5rem;margin-bottom:20px">✨</div>
-        <h2 class="page-title" style="margin-bottom:12px">Join Meet Beyond</h2>
-        <p class="lead" style="margin-bottom:32px">Create your account and start connecting with amazing people</p>
+<main class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">✨</div>
+            <h2 class="auth-title">Join Meet Beyond</h2>
+            <p class="auth-subtitle">Create your account and start connecting with amazing people</p>
+        </div>
 
         <?php if ($error): ?>
-            <div class="alert alert-error" role="alert" style="text-align:left">
+            <div class="alert alert-error" role="alert">
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
 
-        <form method="POST" autocomplete="off" style="text-align:left">
-            <div class="form-row">
-                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
-                    <span style="font-size:1.2rem">📧</span> Email Address
+        <form method="POST" autocomplete="off" class="auth-form">
+            <div class="form-group">
+                <label for="email" class="form-label">
+                    <span class="label-icon">📧</span>
+                    Email Address
                 </label>
-                <input id="email" type="email" name="email" placeholder="your@email.com" required>
+                <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required>
             </div>
 
-            <div class="form-row">
-                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
-                    <span style="font-size:1.2rem">🔒</span> Password
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <span class="label-icon">🔒</span>
+                    Password
                 </label>
-                <input id="password" type="password" name="password" placeholder="At least 6 characters" required>
-                <small style="color:var(--muted);font-size:0.85rem">Must be at least 6 characters long</small>
+                <input type="password" id="password" name="password" class="form-input" placeholder="At least 6 characters" required>
+                <small class="form-hint">Must be at least 6 characters long</small>
             </div>
 
-            <div class="form-row">
-                <label style="display:flex;align-items:center;gap:8px;font-weight:600">
-                    <span style="font-size:1.2rem">✓</span> Confirm Password
+            <div class="form-group">
+                <label for="confirm" class="form-label">
+                    <span class="label-icon">✓</span>
+                    Confirm Password
                 </label>
-                <input id="confirm" type="password" name="confirm" placeholder="Re-enter your password" required>
+                <input type="password" id="confirm" name="confirm" class="form-input" placeholder="Re-enter your password" required>
             </div>
 
-            <button type="submit" class="btn" style="width:100%;justify-content:center;padding:16px;margin-top:24px;font-size:1.05rem">
-                Create My Account →
+            <button type="submit" class="auth-btn auth-btn-primary">
+                Create My Account
             </button>
         </form>
 
-        <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1)">
-            <p style="color:var(--muted);margin-bottom:16px">Already have an account?</p>
-            <a href="login.php" class="btn-ghost" style="display:inline-flex">Sign In</a>
+        <div class="auth-divider">
+            <span>Already have an account?</span>
         </div>
 
-        <div style="margin-top:20px">
-            <a href="index.php" style="color:var(--muted);font-size:0.95rem">← Back to Home</a>
+        <div class="auth-footer">
+            <a href="login.php" class="auth-btn auth-btn-secondary">Sign In</a>
+            <a href="index.php" class="auth-link">← Back to Home</a>
         </div>
     </div>
 </main>
