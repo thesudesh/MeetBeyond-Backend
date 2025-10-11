@@ -48,14 +48,17 @@ if ($is_logged_in) {
     <nav class="nav">
         <?php if ($is_logged_in): ?>
             <?php if ($is_admin): ?>
-                <a href="admin.php">🛡️ Admin</a>
+                <!-- Admin-only navigation -->
+                <a href="javascript:location.reload()" class="btn-ghost">🔄 Refresh</a>
+                <a href="logout.php" class="btn-ghost">Logout</a>
             <?php else: ?>
+                <!-- Regular user navigation -->
                 <a href="discover.php">💖 Discover</a>
+                <a href="browse.php">Browse</a>
+                <a href="messages.php">Messages</a>
+                <a href="profile_view.php">Profile</a>
+                <a href="logout.php" class="btn-ghost">Logout</a>
             <?php endif; ?>
-            <a href="browse.php">Browse</a>
-            <a href="messages.php">Messages</a>
-            <a href="profile_view.php">Profile</a>
-            <a href="logout.php" class="btn-ghost">Logout</a>
         <?php else: ?>
             <a href="register.php" class="btn">Get Started</a>
             <a href="browse.php" class="btn-ghost">Browse</a>
