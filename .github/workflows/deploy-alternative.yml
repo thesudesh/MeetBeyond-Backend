@@ -1,0 +1,33 @@
+name: Deploy to FTP Server (Alternative)
+
+# Alternative deployment workflow using a different FTP action
+on:
+  push:
+    branches: 
+      - local  # Only trigger on local branch updates
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: FTP Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup deployment
+        run: |
+          echo "🚀 Starting MeetBeyond deployment (Alternative)"
+          echo "Target: [From GitHub Secrets]"
+          echo "Branch: ${{ github.ref_name }}"
+          
+      - name: FTP Deploy using LFTP
+        uses: sebastianpopp/ftp-action@releases/v2
+        with:
+          host: ${{ secrets.FTP_HOST }}
+          user: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          localDir: "."
+          remoteDir: "/"
+          options: "--delete --verbose"

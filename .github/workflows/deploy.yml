@@ -1,0 +1,104 @@
+name: Deploy MeetBeyond to FTP Server
+
+# Trigger deployment only on push to local branch
+on:
+  push:
+    branches: 
+      - local  # Only trigger on local branch updates
+  workflow_dispatch:  # Allow manual triggering from GitHub UI
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to FTP
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Get latest commit only for faster checkout
+      
+      - name: 📋 Display Deployment Info
+        run: |
+          echo "🚀 Starting MeetBeyond deployment"
+          echo "📂 Repository: ${{ github.repository }}"
+          echo "🌟 Branch: ${{ github.ref_name }}"
+          echo "💫 Commit: ${{ github.sha }}"
+          echo "👤 Triggered by: ${{ github.actor }}"
+          echo "🎯 Target: ${{ secrets.FTP_HOST }}"
+          echo "📅 Time: $(date)"
+          
+      - name: 🧹 Prepare Deployment Files
+        run: |
+          echo "🧹 Cleaning up development files..."
+          
+          # Remove development files that shouldn't be deployed
+          rm -rf .git* || true
+          rm -f README.md || true
+          rm -f DEPLOYMENT.md || true
+          
+          # Create a simple deployment marker
+          echo "Last deployed: $(date)" > .deployment-timestamp
+          echo "From commit: ${{ github.sha }}" >> .deployment-timestamp
+          echo "Branch: ${{ github.ref_name }}" >> .deployment-timestamp
+          
+          echo "📁 Files ready for deployment:"
+          echo "PHP Files: $(find . -name "*.php" | wc -l)"
+          echo "CSS Files: $(find . -name "*.css" | wc -l)"
+          echo "JS Files: $(find . -name "*.js" | wc -l)"
+          echo "SQL Files: $(find . -name "*.sql" | wc -l)"
+          
+      - name: 🌐 Deploy to FTP Server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          server-dir: /
+          local-dir: ./
+          state-name: .ftp-deploy-sync-state.json
+          dry-run: false
+          log-level: standard
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.DS_Store
+            **/Thumbs.db
+            **/.env*
+            **/DEPLOYMENT.md
+            **/README.md
+            
+      - name: ✅ Deployment Success
+        if: success()
+        run: |
+          echo "✅ MeetBeyond deployed successfully!"
+          echo "🌐 Your application is now live on the FTP server"
+          echo "🕒 Deployment completed at: $(date)"
+          echo "📊 Status: All files synchronized"
+          
+      - name: ❌ Deployment Failed
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "🔍 Please check the workflow logs for details"
+          echo "� Common solutions:"
+          echo "  1. Verify FTP_PASSWORD secret is set correctly"
+          echo "  2. Check FTP server connectivity"
+          echo "  3. Ensure proper file permissions"
+          echo "  4. Try the alternative deployment workflow"
+          
+      - name: 📊 Post-Deployment Summary
+        if: always()
+        run: |
+          echo "📊 Deployment Summary"
+          echo "===================="
+          echo "🎯 Target Server: [From GitHub Secrets]"
+          echo "👤 FTP User: [From GitHub Secrets]"
+          echo "📂 Repository: ${{ github.repository }}"
+          echo "🌟 Branch: ${{ github.ref_name }}"
+          echo "💫 Commit: ${{ github.sha }}"
+          echo "🔄 Workflow Run: ${{ github.run_number }}"
+          echo "📅 Timestamp: $(date)"
