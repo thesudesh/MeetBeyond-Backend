@@ -76,6 +76,14 @@ if ($is_logged_in) {
             header('Location: photos.php?complete=1');
             exit;
         }
+        
+        // Get match count for dashboard
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM Matches WHERE user1_id = ? OR user2_id = ?");
+        $stmt->bind_param("ii", $_SESSION['user_id'], $_SESSION['user_id']);
+        $stmt->execute();
+        $stmt->bind_result($match_count);
+        $stmt->fetch();
+        $stmt->close();
     }
 
     // Fetch email for fallback display
@@ -103,6 +111,7 @@ if ($is_logged_in) {
     <meta charset="UTF-8">
     <title>Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
@@ -249,7 +258,7 @@ if ($is_logged_in) {
             </a>
 
             <!-- Matches Card -->
-            <a href="matches.php" class="card" style="display:flex;align-items:center;gap:20px;padding:24px;text-decoration:none;transition:all 0.3s ease;border:2px solid rgba(167,139,250,0.2)" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(167,139,250,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.borderColor='rgba(167,139,250,0.2)'">
+            <a href="matches.php" class="card" style="display:flex;align-items:center;gap:20px;padding:24px;text-decoration:none;transition:all 0.3s ease;border:2px solid rgba(167,139,250,0.2);position:relative" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(167,139,250,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.borderColor='rgba(167,139,250,0.2)'">
                 <div style="flex-shrink:0;width:56px;height:56px;background:linear-gradient(135deg,rgba(167,139,250,0.2),rgba(139,92,246,0.3));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px">
                     ❤️
                 </div>
@@ -257,6 +266,11 @@ if ($is_logged_in) {
                     <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:6px;color:var(--text)">Matches</h3>
                     <p style="color:var(--muted);font-size:0.95rem;margin:0">View your mutual connections</p>
                 </div>
+                <?php if (isset($match_count) && $match_count > 0): ?>
+                    <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#ec4899,#db2777);color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;box-shadow:0 4px 12px rgba(236,72,153,0.4)">
+                        <?php echo $match_count; ?>
+                    </div>
+                <?php endif; ?>
             </a>
 
             <!-- Messages Card -->

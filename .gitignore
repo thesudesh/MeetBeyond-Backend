@@ -1,2 +1,53 @@
-MBusers/
+# MeetBeyond - Sensitive Files & Development Artifacts
+
+# User uploaded content (keep directory structure)
+MBusers/photos/*.jpg
+MBusers/photos/*.jpeg
+MBusers/photos/*.png
+MBusers/photos/*.gif
+!MBusers/photos/.gitkeep
+
+# Environment and configuration files
 .env
+.env.*
+!.env.example
+config.local.php
+
+# Development tools & IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.phpstorm.meta.php
+_ide_helper.php
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Deployment state files
+.ftp-deploy-sync-state.json
+.deployment-timestamp
+
+# Logs and temporary files
+*.log
+*.tmp
+*.backup
+*.bak
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+vendor/
+
+# Database backups
+*.sql.backup
+*.dump

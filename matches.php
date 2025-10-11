@@ -66,6 +66,7 @@ if ($matches) {
     <meta charset="UTF-8">
     <title>Your Matches | Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         .match-card {

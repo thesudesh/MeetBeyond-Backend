@@ -64,12 +64,14 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
+            **/.github/**
             **/node_modules/**
             **/.DS_Store
             **/Thumbs.db
             **/.env*
             **/DEPLOYMENT.md
             **/README.md
+            **/test-ftp.sh
             
       - name: ✅ Deployment Success
         if: success()

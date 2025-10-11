@@ -92,12 +92,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
     <meta charset="UTF-8">
     <title>Your Messages | Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         .messaging-container {
             display: grid;
             grid-template-columns: 360px 1fr;
-            height: calc(100vh - 200px);
+            grid-template-rows: 1fr;
+            height: 700px;
             min-height: 600px;
             background: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -186,9 +188,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
         
         /* Chat Area Styles */
         .chat-area {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
             background: rgba(31,15,51,0.3);
+            height: 100%;
+            max-height: 100%;
+            overflow: hidden;
         }
         .chat-header {
             padding: 24px 28px;
@@ -197,6 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
             display: flex;
             align-items: center;
             gap: 16px;
+            flex-shrink: 0;
         }
         .chat-header-avatar {
             width: 48px;
@@ -222,12 +228,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
             font-size: 0.9rem;
         }
         .messages-container {
-            flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 28px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            min-height: 0;
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom scrollbar for webkit browsers */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .messages-container::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+        
+        .messages-container::-webkit-scrollbar-thumb {
+            background: rgba(167,139,250,0.3);
+            border-radius: 3px;
+        }
+        
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(167,139,250,0.5);
         }
         .message-bubble {
             max-width: 70%;
@@ -488,10 +515,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
 
 <script>
 // Auto-scroll to bottom of messages
-const messagesContainer = document.getElementById('messagesContainer');
-if (messagesContainer) {
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+function scrollToBottom() {
+    const messagesContainer = document.getElementById('messagesContainer');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 }
+
+// Scroll to bottom when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();
+});
+
+// Scroll to bottom when new message is sent
+document.querySelector('.chat-input-form')?.addEventListener('submit', function() {
+    setTimeout(scrollToBottom, 100);
+});
 </script>
 </body>
 </html>

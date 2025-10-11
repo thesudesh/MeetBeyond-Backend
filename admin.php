@@ -66,6 +66,7 @@ $stats['pending_reports'] = $result->fetch_assoc()['count'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
 </head>
 <body>
 <?php include_once __DIR__ . '/includes/nav.php'; ?>

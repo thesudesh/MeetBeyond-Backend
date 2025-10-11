@@ -136,182 +136,400 @@ $photo_base = "MBusers/photos/";
     <meta charset="UTF-8">
     <title>Discover | Meet Beyond</title>
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        .swipe-container {
-            max-width: 450px;
+        .discover-container {
+            max-width: 420px;
             margin: 0 auto;
             position: relative;
         }
-        .profile-swipe-card {
-            background: var(--card-bg);
+        
+        .discover-header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255,255,255,0.05);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            transition: var(--transition);
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .swipe-photo {
+        
+        .discover-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        
+        .discover-subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .profile-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(30px);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.12);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+        }
+        
+        .profile-image {
             width: 100%;
-            height: 500px;
+            height: 520px;
             object-fit: cover;
             display: block;
+            position: relative;
         }
-        .swipe-info {
-            padding: 28px;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        
+        .profile-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.95));
+            padding: 40px 32px 32px;
+            color: white;
         }
-        .swipe-actions {
+        
+        .profile-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        
+        .profile-details {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            opacity: 0.95;
+        }
+        
+        .profile-tag {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .profile-bio {
+            color: rgba(255,255,255,0.9);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+        
+        .view-profile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-purple);
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(167,139,250,0.15);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(167,139,250,0.3);
+        }
+        
+        .view-profile-link:hover {
+            background: rgba(167,139,250,0.25);
+            transform: translateX(4px);
+        }
+        
+        .action-buttons {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            padding: 30px 0;
+            align-items: center;
+            gap: 24px;
+            padding: 40px 0;
+            margin-top: 32px;
         }
-        .swipe-btn {
-            width: 70px;
-            height: 70px;
+        
+        .action-btn {
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
             cursor: pointer;
-            transition: var(--transition);
-            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            font-size: 1.8rem;
+            position: relative;
+            overflow: hidden;
         }
-        .swipe-btn:hover {
-            transform: scale(1.15);
-            box-shadow: var(--shadow-lg);
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        .swipe-btn:active {
-            transform: scale(0.95);
+        
+        .action-btn:hover {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
         }
-        .btn-pass {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+        
+        .action-btn:hover::before {
+            opacity: 0.2;
+        }
+        
+        .action-btn:active {
+            transform: translateY(-2px) scale(1.05);
+        }
+        
+        .btn-reject {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             color: white;
         }
+        
         .btn-like {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-        }
-        .btn-super {
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
             color: white;
-            width: 80px;
-            height: 80px;
-            font-size: 2.5rem;
+            width: 84px;
+            height: 84px;
+            font-size: 2.2rem;
+            box-shadow: 0 12px 32px rgba(167,139,250,0.4);
         }
-        .match-overlay {
+        
+        .btn-block {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            width: 60px;
+            height: 60px;
+            font-size: 1.4rem;
+        }
+        
+        .empty-state {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 80px 40px;
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            opacity: 0.6;
+            filter: grayscale(0.3);
+        }
+        
+        .empty-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        .empty-text {
+            color: var(--muted);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        
+        .match-popup {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: fadeIn 0.3s;
+            animation: fadeIn 0.4s ease;
         }
-        .match-overlay.active {
+        
+        .match-popup.active {
             display: flex;
         }
+        
         .match-content {
             text-align: center;
-            padding: 40px;
+            padding: 60px 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 24px;
+            border: 2px solid rgba(167,139,250,0.2);
+            backdrop-filter: blur(20px);
+            max-width: 500px;
+            margin: 20px;
         }
+        
+        .match-emoji {
+            font-size: 5rem;
+            margin-bottom: 24px;
+            filter: hue-rotate(15deg) saturate(0.8);
+        }
+        
+        .match-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .match-text {
+            font-size: 1.2rem;
+            color: var(--muted);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        
+        .match-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @media (max-width: 480px) {
+            .discover-container {
+                margin: 0 10px;
+            }
+            
+            .profile-card {
+                border-radius: 20px;
+            }
+            
+            .profile-image {
+                height: 460px;
+            }
+            
+            .action-btn {
+                width: 64px;
+                height: 64px;
+                font-size: 1.6rem;
+            }
+            
+            .btn-like {
+                width: 76px;
+                height: 76px;
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
 <?php include_once __DIR__ . '/includes/nav.php'; ?>
 
-<main class="container" style="padding-top:40px;padding-bottom:60px">
-    <div style="text-align:center;margin-bottom:32px">
-        <h1 class="page-title">Discover</h1>
-        <p class="lead">Swipe right to like, left to pass</p>
+<main class="container" style="padding: 20px 20px 60px;">
+    <div class="discover-header">
+        <h1 class="discover-title">Discover</h1>
+        <p class="discover-subtitle">Find your perfect match</p>
     </div>
 
     <?php if ($has_profile): ?>
-        <div class="swipe-container">
-            <div class="profile-swipe-card">
+        <div class="discover-container">
+            <div class="profile-card">
                 <img src="<?php echo $photo_base . htmlspecialchars($photo_path); ?>" 
                      alt="<?php echo htmlspecialchars($profile_name); ?>" 
-                     class="swipe-photo">
+                     class="profile-image">
                 
-                <div class="swipe-info">
-                    <h2 style="font-size:2rem;margin-bottom:8px;font-weight:700">
+                <div class="profile-overlay">
+                    <h2 class="profile-name">
                         <?php echo htmlspecialchars($profile_name); ?>, <?php echo htmlspecialchars($profile_age); ?>
                     </h2>
-                    <p style="color:rgba(255,255,255,0.9);margin-bottom:12px">
-                        <?php echo ucfirst(htmlspecialchars($profile_gender)); ?>
-                    </p>
+                    <div class="profile-details">
+                        <span class="profile-tag"><?php echo ucfirst(htmlspecialchars($profile_gender)); ?></span>
+                    </div>
                     <?php if ($profile_bio): ?>
-                    <p style="color:rgba(255,255,255,0.85);line-height:1.6">
-                        <?php echo nl2br(htmlspecialchars(mb_strimwidth($profile_bio, 0, 150, "..."))); ?>
+                    <p class="profile-bio">
+                        <?php echo nl2br(htmlspecialchars(mb_strimwidth($profile_bio, 0, 120, "..."))); ?>
                     </p>
                     <?php endif; ?>
-                    <a href="profile_view.php?id=<?php echo $profile_id; ?>" 
-                       style="display:inline-block;margin-top:16px;color:var(--accent-purple);font-weight:600;text-decoration:none">
-                        View Full Profile →
+                    <a href="profile_view.php?id=<?php echo $profile_id; ?>" class="view-profile-link">
+                        View Full Profile
+                        <span>→</span>
                     </a>
                 </div>
             </div>
 
-            <div class="swipe-actions">
+            <div class="action-buttons">
                 <form method="POST" style="display:inline">
                     <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                    <button type="submit" name="action" value="pass" class="swipe-btn btn-pass" title="Pass">
+                    <button type="submit" name="action" value="pass" class="action-btn btn-reject" title="Pass">
                         ✕
                     </button>
                 </form>
 
                 <form method="POST" style="display:inline">
                     <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                    <button type="submit" name="action" value="like" class="swipe-btn btn-super" title="Like">
-                        💖
+                    <button type="submit" name="action" value="like" class="action-btn btn-like" title="Like">
+                        ♡
                     </button>
                 </form>
 
-                <form method="POST" style="display:inline" onsubmit="return confirm('Are you sure you want to block this user? They will no longer appear in your feed.')">
+                <form method="POST" style="display:inline" onsubmit="return confirm('Block this user? They won\'t appear in your feed again.')">
                     <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                    <button type="submit" name="action" value="block" class="swipe-btn btn-pass" title="Block">
-                        🚫
+                    <button type="submit" name="action" value="block" class="action-btn btn-block" title="Block">
+                        ⊘
                     </button>
                 </form>
             </div>
         </div>
     <?php else: ?>
-        <div class="card" style="max-width:500px;margin:0 auto;text-align:center;padding:60px 40px">
-            <div style="font-size:4rem;margin-bottom:24px">🎯</div>
-            <h2 style="font-size:1.8rem;margin-bottom:16px;font-weight:700">No More Profiles</h2>
-            <p style="color:var(--muted);font-size:1.1rem;margin-bottom:32px">
-                You've seen all available profiles. Check back later for new members!
-            </p>
-            <a href="index.php" class="btn" style="padding:16px 32px">Back to Dashboard</a>
+        <div class="discover-container">
+            <div class="empty-state">
+                <div class="empty-icon">🎯</div>
+                <h2 class="empty-title">No More Profiles</h2>
+                <p class="empty-text">
+                    You've seen all available profiles. Check back later for new members!
+                </p>
+                <a href="index.php" class="btn" style="padding:16px 32px">Back to Dashboard</a>
+            </div>
         </div>
     <?php endif; ?>
 </main>
 
 <?php if ($message): ?>
-<div class="match-overlay active" onclick="this.classList.remove('active')">
+<div class="match-popup active" onclick="this.classList.remove('active')">
     <div class="match-content">
-        <div style="font-size:6rem;margin-bottom:24px">💕</div>
-        <h2 style="font-size:3rem;margin-bottom:16px;font-weight:800"><?php echo $message; ?></h2>
-        <p style="font-size:1.2rem;color:var(--muted);margin-bottom:32px">
+        <div class="match-emoji">💕</div>
+        <h2 class="match-title"><?php echo $message; ?></h2>
+        <p class="match-text">
             You can now send messages to each other!
         </p>
-        <div style="display:flex;gap:16px;justify-content:center">
+        <div class="match-actions">
             <a href="messages.php" class="btn" style="padding:16px 32px">Send Message</a>
-            <button onclick="location.reload()" class="btn-ghost" style="padding:16px 32px">Keep Swiping</button>
+            <button onclick="location.reload()" class="btn-ghost" style="padding:16px 32px">Keep Discovering</button>
         </div>
     </div>
 </div>
@@ -335,7 +553,7 @@ document.addEventListener('keydown', (e) => {
 let touchStartX = 0;
 let touchEndX = 0;
 
-const card = document.querySelector('.profile-swipe-card');
+const card = document.querySelector('.profile-card');
 if (card) {
     card.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
