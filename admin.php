@@ -262,6 +262,16 @@ $stats['pending_reports'] = $result->fetch_assoc()['count'];
             </div>
         </a>
 
+        <a href="quiz_manager.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="flex-shrink:0;width:48px;height:48px;background:rgba(236,72,153,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">
+                🧩
+            </div>
+            <div>
+                <h4 style="font-size:1.1rem;font-weight:600;margin-bottom:4px;color:var(--text)">Quiz Manager</h4>
+                <p style="color:var(--muted);font-size:0.875rem;margin:0">Advanced quiz management & analytics</p>
+            </div>
+        </a>
+
         <a href="admin_manage.php?table=Logs" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
             <div style="flex-shrink:0;width:48px;height:48px;background:rgba(148,163,184,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">
                 📋
@@ -269,6 +279,33 @@ $stats['pending_reports'] = $result->fetch_assoc()['count'];
             <div>
                 <h4 style="font-size:1.1rem;font-weight:600;margin-bottom:4px;color:var(--text)">Logs</h4>
                 <p style="color:var(--muted);font-size:0.875rem;margin:0">System activity logs</p>
+            </div>
+        </a>
+    </div>
+
+    <!-- Development Tools -->
+    <h2 style="font-size:1.5rem;font-weight:600;margin-bottom:20px;color:var(--text);margin-top:40px">
+        🛠️ Development Tools
+    </h2>
+    
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:32px">
+        <a href="admin_dummy_data.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease;border:2px solid rgba(16,185,129,0.3)" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="flex-shrink:0;width:48px;height:48px;background:rgba(16,185,129,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">
+                🎲
+            </div>
+            <div>
+                <h4 style="font-size:1.1rem;font-weight:600;margin-bottom:4px;color:var(--text)">Dummy Data Generator</h4>
+                <p style="color:var(--muted);font-size:0.875rem;margin:0">Generate test users, likes, matches & messages</p>
+            </div>
+        </a>
+
+        <a href="db_tool.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="flex-shrink:0;width:48px;height:48px;background:rgba(59,130,246,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">
+                🗄️
+            </div>
+            <div>
+                <h4 style="font-size:1.1rem;font-weight:600;margin-bottom:4px;color:var(--text)">Database Tool</h4>
+                <p style="color:var(--muted);font-size:0.875rem;margin:0">Direct database management</p>
             </div>
         </a>
     </div>

@@ -332,13 +332,13 @@ if ($is_logged_in) {
                 </div>
             </a>
 
-            <a href="preferences.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <a href="quiz.php" class="card" style="display:flex;align-items:center;gap:16px;padding:20px;text-decoration:none;transition:all 0.3s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                 <div style="flex-shrink:0;width:44px;height:44px;background:rgba(251,146,60,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">
-                    ⚙️
+                    🧠
                 </div>
                 <div>
-                    <h4 style="font-size:1.05rem;font-weight:600;margin-bottom:4px;color:var(--text)">Preferences</h4>
-                    <p style="color:var(--muted);font-size:0.875rem;margin:0">Update match settings</p>
+                    <h4 style="font-size:1.05rem;font-weight:600;margin-bottom:4px;color:var(--text)">Personality Quiz</h4>
+                    <p style="color:var(--muted);font-size:0.875rem;margin:0">Discover your personality type</p>
                 </div>
             </a>
         </div>

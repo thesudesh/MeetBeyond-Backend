@@ -73,12 +73,13 @@ if ($is_logged_in) {
         <?php if ($is_logged_in): ?>
             <?php if ($is_admin): ?>
                 <!-- Admin-only navigation -->
-                <a href="javascript:location.reload()" class="btn-ghost">🔄 Refresh</a>
+                <a href="javascript:location.reload()" class="btn-ghost">Refresh</a>
                 <a href="logout.php" class="btn-ghost">Logout</a>
             <?php else: ?>
                 <!-- Regular user navigation -->
-                <a href="discover.php">💖 Discover</a>
+                <a href="discover.php">Discover</a>
                 <a href="browse.php">Browse</a>
+                <a href="quiz.php">Quiz</a>
                 <a href="messages.php">Messages</a>
                 <?php 
                 // Check if user has premium subscription for premium nav link
@@ -91,7 +92,7 @@ if ($is_logged_in) {
                 $nav_stmt->close();
                 
                 if ($nav_has_premium): ?>
-                    <a href="who-liked-me.php" style="color: #fbbf24; font-weight: 700;">👁️ Who Liked Me</a>
+                    <a href="who-liked-me.php" style="color: #fbbf24; font-weight: 700;">Who Liked Me</a>
                 <?php endif; ?>
                 <a href="profile_view.php">Profile</a>
                 <a href="logout.php" class="btn-ghost">Logout</a>

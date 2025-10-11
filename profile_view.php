@@ -97,72 +97,82 @@ $display_age = $profile['age'] ? intval($profile['age']) : null;
     .btn-action {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      padding: 12px 20px;
-      border-radius: 12px;
+      padding: 14px 20px;
+      border-radius: 14px;
       text-decoration: none;
       font-weight: 600;
       font-size: 0.95rem;
       border: 2px solid;
       background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(15px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       position: relative;
       overflow: hidden;
+      min-width: 140px;
+      white-space: nowrap;
     }
     
     .btn-action::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
       opacity: 0;
       transition: opacity 0.3s ease;
+      border-radius: inherit;
     }
     
     .btn-action:hover::before {
-      opacity: 0.1;
+      opacity: 1;
     }
     
     .btn-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.3);
     }
     
     .btn-action:active {
-      transform: translateY(0);
+      transform: translateY(-1px) scale(1.01);
+      transition: all 0.1s ease;
     }
     
     .btn-block {
       color: #fca5a5;
       border-color: #ef4444;
-      background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(220,38,38,0.05));
+      background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.1));
     }
     
     .btn-block:hover {
       color: #ffffff;
       background: linear-gradient(135deg, #ef4444, #dc2626);
       border-color: #ef4444;
-      box-shadow: 0 8px 24px rgba(239,68,68,0.3);
+      box-shadow: 0 12px 32px rgba(239,68,68,0.4);
     }
     
     .btn-report {
       color: #fdba74;
       border-color: #f59e0b;
-      background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(217,119,6,0.05));
+      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1));
     }
     
     .btn-report:hover {
       color: #ffffff;
       background: linear-gradient(135deg, #f59e0b, #d97706);
       border-color: #f59e0b;
-      box-shadow: 0 8px 24px rgba(245,158,11,0.3);
+      box-shadow: 0 12px 32px rgba(245,158,11,0.4);
     }
     
     .btn-icon {
       font-size: 1.1rem;
       filter: brightness(1.1);
+      transition: transform 0.3s ease;
+    }
+    
+    .btn-action:hover .btn-icon {
+      transform: scale(1.1);
     }
     
     .subscription-card {
@@ -248,18 +258,18 @@ $display_age = $profile['age'] ? intval($profile['age']) : null;
             <a href="subscription.php" class="btn btn-ghost" style="margin-left: 12px;">✨ Manage Premium</a>
           <?php else: ?>
             <!-- Actions for viewing other users -->
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <form method="POST" style="display:inline" onsubmit="return confirm('Are you sure you want to block this user? They will no longer appear in your feed.')">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+              <form method="POST" style="display:inline;margin:0" onsubmit="return confirm('Are you sure you want to block this user? They will no longer appear in your feed.')">
                 <input type="hidden" name="action" value="block">
                 <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
                 <button type="submit" class="btn-action btn-block">
                   <span class="btn-icon">🚫</span>
-                  Block User
+                  <span>Block User</span>
                 </button>
               </form>
               <a href="report.php?user_id=<?php echo $profile_id; ?>" class="btn-action btn-report">
                 <span class="btn-icon">⚠️</span>
-                Report User
+                <span>Report User</span>
               </a>
             </div>
           <?php endif; ?>
