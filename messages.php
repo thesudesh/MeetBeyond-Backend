@@ -73,18 +73,7 @@ if ($selected_match) {
     $stmt->close();
 }
 
-// Handle sending a message
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
-    $message = trim($_POST['message']);
-    if ($message !== '') {
-        $stmt = $conn->prepare("INSERT INTO Messages (match_id, sender_id, message) VALUES (?, ?, ?)");
-        $stmt->bind_param("iis", $selected_match, $user_id, $message);
-        $stmt->execute();
-        $stmt->close();
-        header("Location: messages.php?match=$selected_match");
-        exit;
-    }
-}
+// Note: Message sending is now handled via AJAX - no POST processing here
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -466,7 +455,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
                                 <?php endif; ?>
                             </div>
                         </div>
-
+                        
                         <div class="messages-container" id="messagesContainer">
                             <?php if (empty($messages)): ?>
                                 <div style="text-align: center; padding: 60px 20px; color: var(--muted);">
@@ -490,17 +479,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
                         </div>
 
                         <div class="chat-input-container">
-                            <form method="POST" class="chat-input-form">
+                            <div class="chat-input-form" id="messageForm">
                                 <input type="text" 
                                        name="message" 
+                                       id="messageInput"
                                        class="chat-input" 
                                        placeholder="Type your message..." 
                                        required 
                                        autocomplete="off">
-                                <button type="submit" class="send-button">
+                                <button type="button" class="send-button" id="sendButton" onclick="sendMessage()">
                                     Send 💬
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -514,6 +504,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $selected_match) {
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
 
 <script>
+let pollingInterval = null;
+let lastMessageTimestamp = '<?php echo !empty($messages) ? end($messages)['time'] : '1970-01-01 00:00:00'; ?>';
+const currentUserId = <?php echo $user_id; ?>;
+const selectedMatch = <?php echo $selected_match; ?>;
+
 // Auto-scroll to bottom of messages
 function scrollToBottom() {
     const messagesContainer = document.getElementById('messagesContainer');
@@ -522,14 +517,193 @@ function scrollToBottom() {
     }
 }
 
-// Scroll to bottom when page loads
-document.addEventListener('DOMContentLoaded', function() {
+// Format timestamp for display
+function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// Add message to chat
+function addMessageToChat(message) {
+    const messagesContainer = document.getElementById('messagesContainer');
+    if (!messagesContainer) return;
+    
+    // Check if message already exists to prevent duplicates
+    const existingMessage = messagesContainer.querySelector(`[data-message-id="${message.id}"]`);
+    if (existingMessage) {
+        console.log('Message already exists, skipping:', message.id);
+        return;
+    }
+    
+    const isOwnMessage = message.sender_id == currentUserId;
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-bubble ${isOwnMessage ? 'message-sent' : 'message-received'}`;
+    messageDiv.setAttribute('data-message-id', message.id);
+    
+    messageDiv.innerHTML = `
+        <div class="message-text">${escapeHtml(message.message)}</div>
+        <span class="message-time">${formatTime(message.sent_at)}</span>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
     scrollToBottom();
+    lastMessageTimestamp = message.sent_at;
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Poll for new messages
+function pollForMessages() {
+    if (!selectedMatch) return;
+    
+    fetch(`poll_messages.php?match_id=${selectedMatch}&last_timestamp=${encodeURIComponent(lastMessageTimestamp)}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.messages.length > 0) {
+            data.messages.forEach(message => {
+                addMessageToChat(message);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Polling error:', error);
+        // Don't show errors to user for polling failures
+    });
+}
+
+// Send message via AJAX
+function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const message = messageInput.value.trim();
+    
+    if (!message || !selectedMatch) {
+        console.log('No message or selected match');
+        return;
+    }
+    
+    // Disable input while sending
+    messageInput.disabled = true;
+    sendButton.disabled = true;
+    sendButton.textContent = 'Sending...';
+    
+    const formData = new FormData();
+    formData.append('match_id', selectedMatch);
+    formData.append('message', message);
+    
+    console.log('Sending message:', message, 'to match:', selectedMatch);
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.error('Request timed out');
+        alert('Request timed out. Please try again.');
+    }, 8000); // 8 second timeout
+    
+    fetch('send_message.php', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal
+    })
+    .then(response => {
+        clearTimeout(timeoutId);
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            messageInput.value = '';
+            // Poll immediately for the new message
+            setTimeout(pollForMessages, 100);
+        } else {
+            console.error('Send failed:', data.error);
+            alert('Failed to send message: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        clearTimeout(timeoutId);
+        console.error('Fetch error:', error);
+        if (error.name === 'AbortError') {
+            // Timeout already handled above
+            return;
+        }
+        alert('Failed to send message. Please try again.');
+    })
+    .finally(() => {
+        // Always re-enable the form
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        sendButton.textContent = 'Send 💬';
+        messageInput.focus();
+    });
+}
+
+// Initialize polling
+function initRealTimeMessaging() {
+    if (!selectedMatch) return;
+    
+    console.log('Initializing polling for match:', selectedMatch);
+    
+    // Stop any existing polling
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    
+    // Start polling every 3 seconds
+    pollingInterval = setInterval(pollForMessages, 3000);
+}
+
+// Handle Enter key in message input
+document.getElementById('messageInput')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
 });
 
-// Scroll to bottom when new message is sent
-document.querySelector('.chat-input-form')?.addEventListener('submit', function() {
-    setTimeout(scrollToBottom, 100);
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();
+    
+    // Start polling after a short delay
+    setTimeout(() => {
+        if (selectedMatch) {
+            initRealTimeMessaging();
+        }
+    }, 500);
+});
+
+// Clean up polling when page unloads
+window.addEventListener('beforeunload', function() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+});
+
+// Handle visibility change to manage polling
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Page is hidden, stop polling to save resources
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
+    } else {
+        // Page is visible, restart polling
+        if (selectedMatch && !pollingInterval) {
+            initRealTimeMessaging();
+        }
+    }
 });
 </script>
 </body>
