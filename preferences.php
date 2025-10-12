@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $error = '';
 $must_complete = isset($_GET['complete']);
+$return_to = $_GET['return'] ?? null;
 
 // Load preferences if any
 $stmt = $conn->prepare("SELECT min_age, max_age, gender_pref, location, relationship_type, interests FROM Preferences WHERE user_id=?");
@@ -26,6 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $location = trim($_POST['location']);
     $relationship_type = trim($_POST['relationship_type']);
     $interests = trim($_POST['interests']);
+    $return_to = $_POST['return'] ?? null;
 
     if ($min_age < 18 || $max_age < $min_age) {
         $error = "Please enter a valid age range (minimum age at least 18, max age not less than min age).";
@@ -50,8 +52,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->execute();
             $stmt->close();
         }
-        // Redirect to photos setup
-        header('Location: photos.php?complete=1');
+        
+        
+        // Redirect based on where user came from
+        if ($return_to === 'browse') {
+            header('Location: browse.php');
+        } else {
+            // Default redirect for initial profile setup
+            header('Location: photos.php?complete=1');
+        }
         exit;
     }
 }
@@ -72,8 +81,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,rgba(244,114,182,0.15),rgba(167,139,250,0.1))">
             <div style="text-align:center">
                 <div style="font-size:3rem;margin-bottom:12px">💝</div>
-                <h2 class="page-title" style="margin-bottom:8px">Your Dating Preferences</h2>
-                <p style="color:var(--muted);margin:0">Help us find your perfect match by setting your preferences</p>
+                <?php if ($return_to === 'browse'): ?>
+                    <h2 class="page-title" style="margin-bottom:8px">Edit Browse Filters</h2>
+                    <p style="color:var(--muted);margin:0">Update your preferences to refine the profiles shown</p>
+                <?php else: ?>
+                    <h2 class="page-title" style="margin-bottom:8px">Your Dating Preferences</h2>
+                    <p style="color:var(--muted);margin:0">Help us find your perfect match by setting your preferences</p>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -88,6 +102,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <?php endif; ?>
 
         <form method="POST" autocomplete="off">
+            <?php if ($return_to): ?>
+                <input type="hidden" name="return" value="<?php echo htmlspecialchars($return_to); ?>">
+
+            <?php endif; ?>
             <!-- Age Range Card -->
             <div class="card" style="margin-bottom:20px">
                 <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px">
