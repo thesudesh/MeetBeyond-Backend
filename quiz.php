@@ -572,14 +572,6 @@ if (!isset($quiz_completed)) {
                 </a>
             </div>
             
-            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 10px;">
-                    Want to refine your results?
-                </p>
-                <a href="quiz.php?q=1" style="color: #ec4899; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
-                    Retake Quiz →
-                </a>
-            </div>
         </div>
     <?php elseif ($current_question): ?>
         <div class="quiz-layout">

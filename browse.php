@@ -258,7 +258,7 @@ $photo_base = "MBusers/photos/";
                         , Ages <?php echo $min_age; ?>-<?php echo $max_age; ?> first
                     <?php endif; ?>
                 </span>
-                <a href="preferences.php" style="color: var(--accent-purple); text-decoration: none; margin-left: 8px; font-size: 0.85rem;">
+                <a href="preferences.php?return=browse" style="color: var(--accent-purple); text-decoration: none; margin-left: 8px; font-size: 0.85rem;">
                     ⚙️ Edit
                 </a>
             </div>
