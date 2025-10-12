@@ -30,7 +30,7 @@ $stmt->bind_result($min_age, $max_age, $gender_pref, $location);
 $stmt->fetch();
 $stmt->close();
 
-// Fetch random users (exclude current user, admins, users without complete profiles, prioritize by preferences)
+// Fetch random users (exclude current user, admins, users without complete profiles, blocked users, prioritize by preferences)
 $sql = "
     SELECT u.id, p.name, p.age, p.gender, p.bio, ph.file_path
     FROM Users u
@@ -40,6 +40,12 @@ $sql = "
     AND u.role != 'admin'
     AND p.name IS NOT NULL 
     AND p.age IS NOT NULL
+    AND u.id NOT IN (
+        SELECT blocked_id FROM Blocks WHERE blocker_id = ?
+    )
+    AND u.id NOT IN (
+        SELECT blocker_id FROM Blocks WHERE blocked_id = ?
+    )
     ORDER BY 
         CASE 
             WHEN (? IS NULL OR ? = 'both' OR ? = 'any' OR p.gender = ?) THEN 1 
@@ -54,9 +60,11 @@ $sql = "
 
 $stmt = $conn->prepare($sql);
 
-// Bind parameters for prioritization (user_id, gender prefs, age prefs)
-$stmt->bind_param("issssiiii", 
+// Bind parameters for exclusions and prioritization (user_id, blocked users check, gender prefs, age prefs)
+$stmt->bind_param("iiissssiiii", 
     $user_id,                                               // exclude current user
+    $user_id,                                               // exclude users blocked by current user
+    $user_id,                                               // exclude users who blocked current user
     $gender_pref, $gender_pref, $gender_pref, $gender_pref, // gender priority params
     $min_age, $max_age, $min_age, $max_age                  // age priority params  
 );

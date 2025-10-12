@@ -259,6 +259,19 @@ if ($is_logged_in) {
             </p>
         </div>
 
+        <?php if (isset($_GET['blocked']) && $_GET['blocked'] == '1'): ?>
+        <!-- Block Success Message -->
+        <div class="alert alert-success" style="margin-bottom:24px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(21,128,61,0.1));border:2px solid rgba(34,197,94,0.3);border-radius:16px;padding:20px">
+            <div style="display:flex;align-items:center;gap:12px">
+                <span style="font-size:1.5rem">✅</span>
+                <div>
+                    <strong style="color:#10b981">User Blocked Successfully</strong>
+                    <p style="margin:4px 0 0 0;color:var(--muted);font-size:0.9rem">The user has been blocked and will no longer appear in your discovery feed.</p>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Main Dashboard Grid -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-bottom:24px">
             <!-- Discover Card -->

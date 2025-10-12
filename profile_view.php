@@ -15,6 +15,7 @@ $profile_id = isset($_GET['id']) ? intval($_GET['id']) : (isset($_GET['user']) ?
 // Handle block action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'block') {
     $target_id = intval($_POST['target_id']);
+    
     if ($target_id && $target_id !== $viewer_id) {
         // Block user
         $stmt = $conn->prepare("INSERT IGNORE INTO Blocks (blocker_id, blocked_id) VALUES (?, ?)");

@@ -22,68 +22,6 @@ if ($user_role === 'admin') {
     exit;
 }
 
-$message = '';
-
-// Handle like/pass actions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    $target_id = intval($_POST['target_id'] ?? 0);
-    
-    if ($action === 'like' && $target_id > 0) {
-        // Insert like
-        $stmt = $conn->prepare("INSERT INTO Likes (liker_id, liked_id, status) VALUES (?, ?, 'liked') ON DUPLICATE KEY UPDATE status='liked', created_at=NOW()");
-        $stmt->bind_param("ii", $user_id, $target_id);
-        $stmt->execute();
-        $stmt->close();
-        
-        // Check if they liked back (mutual like = match)
-        $stmt = $conn->prepare("SELECT id FROM Likes WHERE liker_id=? AND liked_id=? AND status='liked'");
-        $stmt->bind_param("ii", $target_id, $user_id);
-        $stmt->execute();
-        $stmt->store_result();
-        $is_mutual = $stmt->num_rows > 0;
-        $stmt->close();
-        
-        if ($is_mutual) {
-            // Create match
-            $user_low = min($user_id, $target_id);
-            $user_high = max($user_id, $target_id);
-            $stmt = $conn->prepare("INSERT IGNORE INTO Matches (user1_id, user2_id, user_low_id, user_high_id) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iiii", $user_id, $target_id, $user_low, $user_high);
-            $stmt->execute();
-            $stmt->close();
-            $message = "🎉 It's a Match!";
-        }
-        
-        // Clear the current discover profile from session after action
-        unset($_SESSION['current_discover_profile']);
-    } elseif ($action === 'pass' && $target_id > 0) {
-        // Insert pass (so we don't show them again)
-        $stmt = $conn->prepare("INSERT INTO Likes (liker_id, liked_id, status) VALUES (?, ?, 'passed') ON DUPLICATE KEY UPDATE status='passed', created_at=NOW()");
-        $stmt->bind_param("ii", $user_id, $target_id);
-        $stmt->execute();
-        $stmt->close();
-        
-        // Clear the current discover profile from session after action
-        unset($_SESSION['current_discover_profile']);
-    } elseif ($action === 'block' && $target_id > 0) {
-        // Block user
-        $stmt = $conn->prepare("INSERT IGNORE INTO Blocks (blocker_id, blocked_id) VALUES (?, ?)");
-        $stmt->bind_param("ii", $user_id, $target_id);
-        $stmt->execute();
-        $stmt->close();
-        
-        // Also add to passed
-        $stmt = $conn->prepare("INSERT INTO Likes (liker_id, liked_id, status) VALUES (?, ?, 'passed') ON DUPLICATE KEY UPDATE status='passed'");
-        $stmt->bind_param("ii", $user_id, $target_id);
-        $stmt->execute();
-        $stmt->close();
-        
-        // Clear the current discover profile from session after action
-        unset($_SESSION['current_discover_profile']);
-    }
-}
-
 // Fetch user's preferences
 $stmt = $conn->prepare("SELECT min_age, max_age, gender_pref FROM Preferences WHERE user_id=?");
 $stmt->bind_param("i", $user_id);
@@ -134,6 +72,9 @@ if (isset($_SESSION['current_discover_profile'])) {
             SELECT blocked_id FROM Blocks WHERE blocker_id = ?
         )
         AND u.id NOT IN (
+            SELECT blocker_id FROM Blocks WHERE blocked_id = ?
+        )
+        AND u.id NOT IN (
             SELECT CASE 
                 WHEN user1_id = ? THEN user2_id 
                 WHEN user2_id = ? THEN user1_id 
@@ -142,7 +83,7 @@ if (isset($_SESSION['current_discover_profile'])) {
             WHERE user1_id = ? OR user2_id = ?
         )
     ");
-    $stmt->bind_param("iiiiiiii", $stored_profile_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id);
+    $stmt->bind_param("iiiiiiiii", $stored_profile_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $profile_data = $result->fetch_assoc();
@@ -170,6 +111,9 @@ if (!$profile_data) {
             SELECT blocked_id FROM Blocks WHERE blocker_id = ?
         )
         AND u.id NOT IN (
+            SELECT blocker_id FROM Blocks WHERE blocked_id = ?
+        )
+        AND u.id NOT IN (
             SELECT CASE 
                 WHEN user1_id = ? THEN user2_id 
                 WHEN user2_id = ? THEN user1_id 
@@ -179,8 +123,8 @@ if (!$profile_data) {
         )";
 
     // Add strict gender filter only if preference is set and not 'any' or 'both'
-    $params = [$user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id];
-    $types = "iiiiiii";
+    $params = [$user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id];
+    $types = "iiiiiiii";
 
     if ($gender_pref && $gender_pref !== 'any' && $gender_pref !== 'both') {
         $sql .= " AND p.gender = ?";
@@ -253,32 +197,6 @@ $photo_base = "MBusers/photos/";
             justify-content: center;
             min-height: 70vh;
             gap: 40px;
-        }
-        
-        .discover-header {
-            text-align: center;
-            margin-bottom: 40px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 32px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .discover-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 12px;
-        }
-        
-        .discover-subtitle {
-            color: var(--muted);
-            font-size: 1.1rem;
-            font-weight: 500;
         }
         
         .swipe-area {
@@ -680,23 +598,23 @@ $photo_base = "MBusers/photos/";
 <?php include_once __DIR__ . '/includes/nav.php'; ?>
 
 <main class="container" style="padding: 20px 20px 60px;">
-    <div class="discover-header">
-        <h1 class="discover-title">Discover</h1>
-        <p class="discover-subtitle">Find your perfect match</p>
-    </div>
-
     <?php if ($has_profile): ?>
+        <!-- Subtle page indicator -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <span style="color: var(--muted); font-size: 0.9rem; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                💖 Discover
+            </span>
+        </div>
+        
         <div class="discover-container">
             <!-- Left Pass Area -->
-            <form method="POST" class="swipe-area left" onclick="this.querySelector('button').click()">
-                <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                <button type="submit" name="action" value="pass" style="display: none;"></button>
+            <div class="swipe-area left" onclick="performAction('pass', <?php echo $profile_id; ?>)">
                 <div class="swipe-content">
                     <span class="swipe-icon">👎</span>
                     <div class="swipe-text">Pass</div>
                     <div class="swipe-hint">Click to pass</div>
                 </div>
-            </form>
+            </div>
 
             <!-- Profile Card -->
             <div class="profile-card-wrapper">
@@ -750,15 +668,13 @@ $photo_base = "MBusers/photos/";
             </div>
 
             <!-- Right Like Area -->
-            <form method="POST" class="swipe-area right" onclick="this.querySelector('button').click()">
-                <input type="hidden" name="target_id" value="<?php echo $profile_id; ?>">
-                <button type="submit" name="action" value="like" style="display: none;"></button>
+            <div class="swipe-area right" onclick="performAction('like', <?php echo $profile_id; ?>)">
                 <div class="swipe-content">
                     <span class="swipe-icon">💖</span>
                     <div class="swipe-text">Like</div>
                     <div class="swipe-hint">Click to like</div>
                 </div>
-            </form>
+            </div>
         </div>
     <?php else: ?>
         <div class="discover-container">
@@ -784,36 +700,119 @@ $photo_base = "MBusers/photos/";
     <?php endif; ?>
 </main>
 
-<?php if ($message): ?>
-<div class="match-popup active" onclick="this.classList.remove('active')">
-    <div class="match-content">
-        <div class="match-emoji">💕</div>
-        <h2 class="match-title"><?php echo $message; ?></h2>
-        <p class="match-text">
-            You can now send messages to each other!
-        </p>
-        <div class="match-actions">
-            <a href="messages.php" class="btn" style="padding:16px 32px">Send Message</a>
-            <button onclick="location.reload()" class="btn-ghost" style="padding:16px 32px">Keep Discovering</button>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
 <a href="index.php" class="back-btn" title="Back to Dashboard">←</a>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
 
 <script>
+let isProcessing = false;
+
+// AJAX function to handle like/pass actions
+function performAction(action, targetId) {
+    if (isProcessing) return;
+    
+    isProcessing = true;
+    
+    // Show loading state
+    const container = document.querySelector('.discover-container');
+    if (container) {
+        container.style.opacity = '0.7';
+        container.style.pointerEvents = 'none';
+    }
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('action', action);
+    formData.append('target_id', targetId);
+    
+    fetch('discover_action.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.match) {
+                // Show match notification
+                showMatchNotification(data.message);
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                // Load next profile without page reload
+                location.reload();
+            }
+        } else {
+            console.error('Action failed:', data.error);
+            alert('Something went wrong. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again.');
+    })
+    .finally(() => {
+        isProcessing = false;
+        if (container) {
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+        }
+    });
+}
+
+// Show match notification
+function showMatchNotification(message) {
+    const notification = document.createElement('div');
+    notification.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            z-index: 10000;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: matchBounce 0.6s ease-out;
+        ">
+            ${message}
+        </div>
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes matchBounce {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(notification);
+}
+
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
+    if (isProcessing) return;
+    
+    const profileId = <?php echo $has_profile ? $profile_id : 0; ?>;
+    if (!profileId) return;
+    
     if (e.key === 'ArrowLeft') {
-        document.querySelector('.swipe-area.left button')?.click();
+        e.preventDefault();
+        performAction('pass', profileId);
     } else if (e.key === 'ArrowRight') {
-        document.querySelector('.swipe-area.right button')?.click();
+        e.preventDefault();
+        performAction('like', profileId);
     } else if (e.key === 'ArrowUp' || e.key === ' ') {
         e.preventDefault();
-        document.querySelector('.swipe-area.right button')?.click();
+        performAction('like', profileId);
     }
 });
 
@@ -824,25 +823,31 @@ let touchEndX = 0;
 const card = document.querySelector('.profile-card');
 if (card) {
     card.addEventListener('touchstart', (e) => {
+        if (isProcessing) return;
         touchStartX = e.changedTouches[0].screenX;
     });
 
     card.addEventListener('touchend', (e) => {
+        if (isProcessing) return;
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
     });
 
     function handleSwipe() {
         const swipeThreshold = 100;
+        const profileId = <?php echo $has_profile ? $profile_id : 0; ?>;
+        if (!profileId) return;
+        
         if (touchEndX < touchStartX - swipeThreshold) {
             // Swipe left - pass
-            document.querySelector('.swipe-area.left button')?.click();
+            performAction('pass', profileId);
         } else if (touchEndX > touchStartX + swipeThreshold) {
             // Swipe right - like
-            document.querySelector('.swipe-area.right button')?.click();
+            performAction('like', profileId);
         }
     }
 }
+</script>
 
 // Add visual feedback for swipe areas
 document.querySelectorAll('.swipe-area').forEach(area => {

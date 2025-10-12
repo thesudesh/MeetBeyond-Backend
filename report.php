@@ -35,16 +35,13 @@ $error = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reason = trim($_POST['reason']);
-    $description = trim($_POST['description']);
     
     if (empty($reason)) {
         $error = 'Please select a reason for reporting.';
-    } elseif (empty($description)) {
-        $error = 'Please provide a description of the issue.';
     } else {
         // Insert report
-        $stmt = $conn->prepare("INSERT INTO Reports (reporter_id, reported_user_id, reason, description, status) VALUES (?, ?, ?, ?, 'pending')");
-        $stmt->bind_param("iiss", $reporter_id, $reported_user_id, $reason, $description);
+        $stmt = $conn->prepare("INSERT INTO Reports (reporter_id, target_id, reason, status) VALUES (?, ?, ?, 'pending')");
+        $stmt->bind_param("iis", $reporter_id, $reported_user_id, $reason);
         
         if ($stmt->execute()) {
             $success = true;
@@ -122,18 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="description" style="font-weight: 600; color: var(--text); margin-bottom: 12px; display: block;">
-                            Description *
-                        </label>
-                        <textarea name="description" id="description" required 
-                                  placeholder="Please provide specific details about the issue. Include any relevant information that would help our moderation team understand the situation."
-                                  style="width: 100%; min-height: 140px; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.15); color: var(--text); font-size: 1rem; resize: vertical; line-height: 1.6;"></textarea>
-                        <small style="color: var(--muted); font-size: 0.9rem; margin-top: 8px; display: block;">
-                            Minimum 20 characters required
-                        </small>
-                    </div>
-
                     <div style="background: rgba(251,146,60,0.1); border: 1px solid rgba(251,146,60,0.3); border-radius: 12px; padding: 20px; margin: 16px 0;">
                         <div style="display: flex; align-items: start; gap: 12px;">
                             <span style="font-size: 1.2rem;">ℹ️</span>
@@ -168,26 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
 
 <script>
-// Form validation
+// Simple form validation
 document.querySelector('form')?.addEventListener('submit', function(e) {
-    const description = document.getElementById('description').value.trim();
-    if (description.length < 20) {
+    const reason = document.getElementById('reason').value;
+    if (!reason) {
         e.preventDefault();
-        alert('Please provide a more detailed description (minimum 20 characters).');
+        alert('Please select a reason for reporting.');
         return false;
-    }
-});
-
-// Character counter for description
-document.getElementById('description')?.addEventListener('input', function() {
-    const length = this.value.trim().length;
-    const small = this.parentNode.querySelector('small');
-    if (length < 20) {
-        small.style.color = '#ef4444';
-        small.textContent = `${length}/20 characters minimum required`;
-    } else {
-        small.style.color = 'var(--muted)';
-        small.textContent = `${length} characters`;
     }
 });
 </script>
